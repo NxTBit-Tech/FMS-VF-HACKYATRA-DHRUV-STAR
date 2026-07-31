@@ -1,18 +1,11 @@
 // services/payloadService.js
 //
-// Generates the two payloads at file creation time. Both are DERIVED
-// from reference_number, not independently random — this keeps them
-// stable pointers rather than data that needs rewriting on every
-// transition (a printed barcode label can't be "regenerated" anyway).
+// Payload strings at file creation (stable, never updated on transition):
+//   qr_payload      — static JSON identity blob
+//   barcode_payload — plain reference_number
 //
-// qr_payload  — static identity data, JSON-encoded. Answers "what is
-//               this file" (who created it, department, when). Never
-//               changes after creation.
-// barcode_payload — a plain, stable reference to the file. Scanning
-//               this is how officers resolve "what am I holding" to a
-//               file id + LIVE state (current stage, holder, SLA) via
-//               GET /files/scan/:payload. The barcode itself carries
-//               no state — it's a pointer, the live lookup carries state.
+// Printable PNGs (labelService) encode the same strings.
+// resolveScanInput() normalizes what a scanner/keyboard sends into a lookup key.
 
 function buildQrPayload({ referenceNumber, department, createdByName, createdAt }) {
   return JSON.stringify({
@@ -24,12 +17,47 @@ function buildQrPayload({ referenceNumber, department, createdByName, createdAt 
 }
 
 function buildBarcodePayload({ referenceNumber }) {
-  // Deliberately just the reference number. Security note: this is NOT
-  // a security boundary — dispatch/receive/terminal routes already
-  // enforce role + custody checks independently of how the file was
-  // selected. A guessable reference number lets someone look up a file
-  // (same info the citizen portal already gives), not act on it.
   return referenceNumber;
 }
 
-module.exports = { buildQrPayload, buildBarcodePayload };
+/**
+ * Normalize raw scanner output to a reference number + scan kind.
+ * Handles: Code128 plain ref, QR JSON blob, URL-encoded text.
+ */
+function resolveScanInput(raw) {
+  if (raw == null) return null;
+
+  let text = String(raw).trim();
+  if (!text) return null;
+
+  try {
+    text = decodeURIComponent(text);
+  } catch {
+    // use as-is if not URI-encoded
+  }
+
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed.referenceNumber === 'string' && parsed.referenceNumber.trim()) {
+      return {
+        referenceNumber: parsed.referenceNumber.trim(),
+        rawPayload: text,
+        scanType: 'qr',
+      };
+    }
+  } catch {
+    // not JSON — barcode or typed reference
+  }
+
+  return {
+    referenceNumber: text.trim(),
+    rawPayload: text,
+    scanType: 'barcode',
+  };
+}
+
+module.exports = {
+  buildQrPayload,
+  buildBarcodePayload,
+  resolveScanInput,
+};

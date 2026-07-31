@@ -1,0 +1,4 @@
+node_modules/
+.env
+public/uploads/qr/*.png
+public/uploads/barcodes/*.png

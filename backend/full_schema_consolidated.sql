@@ -4,6 +4,9 @@
 -- Pilot scope: Town Planning dept, Building Permission workflow
 -- Includes: base schema + Migration 001 (department scoping,
 -- workflow_templates, dispatch/receive custody handoff, transit SLA)
+--           + label image paths (qr_image_path, barcode_image_path)
+--             for printable PNGs generated at file creation (same
+--             content as qr_payload / barcode_payload text fields).
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -76,8 +79,10 @@ CREATE TABLE files (
     pending_holder_id INT REFERENCES users(id), -- dispatched to, not yet confirmed
     dispatched_at TIMESTAMP,                    -- set on dispatch, cleared on receive
     status file_status_enum NOT NULL DEFAULT 'in_progress',
-    qr_payload TEXT NOT NULL,
-    barcode_payload TEXT NOT NULL,
+    qr_payload TEXT NOT NULL,       -- static JSON identity blob (never changes)
+    barcode_payload TEXT NOT NULL,  -- plain reference_number pointer
+    qr_image_path TEXT,             -- /uploads/qr/{ref}.png — encodes qr_payload
+    barcode_image_path TEXT,        -- /uploads/barcodes/{ref}.png — Code128 of barcode_payload
     created_by INT NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     stage_entered_at TIMESTAMP NOT NULL DEFAULT now()
@@ -179,6 +184,7 @@ CREATE INDEX idx_files_current_stage ON files(current_stage_id);
 CREATE INDEX idx_files_status ON files(status);
 CREATE INDEX idx_files_holder ON files(current_holder_id);
 CREATE INDEX idx_files_pending_holder ON files(pending_holder_id);
+CREATE INDEX idx_files_reference_number ON files(reference_number);
 CREATE INDEX idx_custody_log_file ON custody_log(file_id);
 
 
@@ -318,6 +324,18 @@ LEFT JOIN stages s_to ON cl.to_stage_id = s_to.id
 JOIN users u ON cl.handled_by = u.id
 WHERE cl.file_id = $1
 ORDER BY cl.scanned_at ASC;
+
+-- ---- I. Officer scan lookup (authenticated) ----
+-- $1 = resolved reference_number, $2 = raw scanned string (barcode or QR JSON)
+SELECT f.id, f.reference_number, f.status, f.stage_entered_at,
+       f.qr_payload, f.barcode_payload, f.qr_image_path, f.barcode_image_path,
+       f.current_holder_id, f.pending_holder_id, f.dispatched_at,
+       s.id AS stage_id, s.stage_name, s.sla_hours
+FROM files f
+JOIN stages s ON f.current_stage_id = s.id
+WHERE f.reference_number = $1
+   OR f.barcode_payload = $2
+   OR f.qr_payload = $2;
 
 -- ---- H. Dashboard: files stuck in transit (dispatched, not received, past SLA) ----
 -- Commissioner-only view

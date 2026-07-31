@@ -7,9 +7,17 @@
 //   5. errorHandler    — must be LAST
 
 const express = require('express');
+const path = require('path');
+const cors = require('cors');
 const app = express();
 
+const { corsOrigin } = require('./config/env');
+
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
+
+// Static assets: generated QR/barcode PNGs and future frontend pages
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const { verifyJWT } = require('./middleware/auth');
 const { requireRole } = require('./middleware/requireRole');
@@ -25,10 +33,10 @@ app.use('/auth', require('./routes/auth'));
 // 3. Everything below requires a valid JWT
 app.use(verifyJWT);
 
-// 4. Authenticated routes
+// 4. Authenticated routes — scan BEFORE files so /files/scan is not caught by /files/:id
+app.use('/files', require('./routes/scan'));
 app.use('/files', require('./routes/files'));
-app.use('/files', require('./routes/transitions')); // same base path, different concerns
-app.use('/files', require('./routes/scan'));         // GET /files/scan/:payload
+app.use('/files', require('./routes/transitions'));
 app.use('/dashboard', scopeDashboard, require('./routes/dashboard'));
 
 // workflows.js not yet built — placeholder mount, commented out until ready:

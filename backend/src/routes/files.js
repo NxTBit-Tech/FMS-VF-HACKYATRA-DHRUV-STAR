@@ -9,14 +9,64 @@ const router = express.Router();
 const pool = require('../db/pool');
 const { requireRole } = require('../middleware/requireRole');
 const { buildQrPayload, buildBarcodePayload } = require('../services/payloadService');
+const { generateLabelImages } = require('../services/labelService');
+const { getFileLabels } = require('../services/scanService');
 
-// Reference numbers are generated server-side, never trusted from the
-// client — this is also what both payloads get derived from, so the
-// client never gets to choose what a scan resolves to.
 function generateReferenceNumber() {
   const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const randomPart = Math.floor(1000 + Math.random() * 9000); // 4-digit suffix
+  const randomPart = Math.floor(1000 + Math.random() * 9000);
   return `TP-${datePart}-${randomPart}`;
+}
+
+async function insertFileWithLabels({
+  referenceNumber,
+  applicantName,
+  applicantContact,
+  propertyAddress,
+  stage1Id,
+  creatorId,
+  creatorName,
+  department,
+  createdAt,
+}) {
+  const qrPayload = buildQrPayload({
+    referenceNumber,
+    department,
+    createdByName: creatorName,
+    createdAt,
+  });
+  const barcodePayload = buildBarcodePayload({ referenceNumber });
+
+  const { qrImagePath, barcodeImagePath } = await generateLabelImages({
+    referenceNumber,
+    qrPayload,
+    barcodePayload,
+  });
+
+  const insertResult = await pool.query(
+    `INSERT INTO files
+       (reference_number, applicant_name, applicant_contact, property_address,
+        department, current_stage_id, current_holder_id,
+        qr_payload, barcode_payload, qr_image_path, barcode_image_path, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $7)
+     RETURNING id, reference_number, current_stage_id, status,
+               qr_payload, barcode_payload, qr_image_path, barcode_image_path`,
+    [
+      referenceNumber,
+      applicantName,
+      applicantContact || null,
+      propertyAddress || null,
+      department,
+      stage1Id,
+      creatorId,
+      qrPayload,
+      barcodePayload,
+      qrImagePath,
+      barcodeImagePath,
+    ]
+  );
+
+  return insertResult.rows[0];
 }
 
 // POST /files
@@ -30,7 +80,6 @@ router.post('/', requireRole('revenue_inspector'), async (req, res, next) => {
       return res.status(400).json({ error: 'applicantName is required.' });
     }
 
-    // Stage 1 ("Submitted") is fixed for new files in this pilot's workflow.
     const stageResult = await pool.query(
       `SELECT id FROM stages WHERE stage_order = 1 AND department_id = 1`
     );
@@ -39,72 +88,67 @@ router.post('/', requireRole('revenue_inspector'), async (req, res, next) => {
     }
     const stage1Id = stageResult.rows[0].id;
 
-    // fullName isn't on the JWT (only id + role are, by design — see
-    // middleware/auth.js) so it's looked up fresh here rather than trusted
-    // from the token or the request body.
     const creatorResult = await pool.query(
-      `SELECT full_name FROM users WHERE id = $1`,
+      `SELECT full_name, department FROM users WHERE id = $1`,
       [req.user.id]
     );
     const creatorName = creatorResult.rows[0]?.full_name || 'Unknown';
-
-    const referenceNumber = generateReferenceNumber();
+    const department = creatorResult.rows[0]?.department || 'Town Planning';
     const createdAt = new Date().toISOString();
 
-    const qrPayload = buildQrPayload({
-      referenceNumber,
-      department: 'Town Planning',
-      createdByName: creatorName,
-      createdAt,
-    });
-    const barcodePayload = buildBarcodePayload({ referenceNumber });
+    let fileRecord;
+    const referenceNumber = generateReferenceNumber();
 
-    // Retry once on the rare reference_number collision (random suffix clash).
-    let insertResult;
     try {
-      insertResult = await pool.query(
-        `INSERT INTO files
-           (reference_number, applicant_name, applicant_contact, property_address,
-            current_stage_id, current_holder_id, qr_payload, barcode_payload, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $6)
-         RETURNING id, reference_number, current_stage_id, status, qr_payload, barcode_payload`,
-        [
-          referenceNumber,
-          applicantName,
-          applicantContact || null,
-          propertyAddress || null,
-          stage1Id,
-          req.user.id, // creator is also the initial holder
-          qrPayload,
-          barcodePayload,
-        ]
-      );
+      fileRecord = await insertFileWithLabels({
+        referenceNumber,
+        applicantName,
+        applicantContact,
+        propertyAddress,
+        stage1Id,
+        creatorId: req.user.id,
+        creatorName,
+        department,
+        createdAt,
+      });
     } catch (err) {
       if (err.code === '23505') {
-        // extremely unlikely collision on the random suffix — regenerate once
-        const retryRef = generateReferenceNumber();
-        const retryBarcode = buildBarcodePayload({ referenceNumber: retryRef });
-        const retryQr = buildQrPayload({
-          referenceNumber: retryRef,
-          department: 'Town Planning',
-          createdByName: creatorName,
+        fileRecord = await insertFileWithLabels({
+          referenceNumber: generateReferenceNumber(),
+          applicantName,
+          applicantContact,
+          propertyAddress,
+          stage1Id,
+          creatorId: req.user.id,
+          creatorName,
+          department,
           createdAt,
         });
-        insertResult = await pool.query(
-          `INSERT INTO files
-             (reference_number, applicant_name, applicant_contact, property_address,
-              current_stage_id, current_holder_id, qr_payload, barcode_payload, created_by)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $6)
-           RETURNING id, reference_number, current_stage_id, status, qr_payload, barcode_payload`,
-          [retryRef, applicantName, applicantContact || null, propertyAddress || null,
-           stage1Id, req.user.id, retryQr, retryBarcode]
-        );
       } else {
         throw err;
       }
     }
 
-    res.status(201).json(insertResult.rows[0]);
+    res.status(201).json(fileRecord);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /files/:id/labels — QR/barcode PNG paths for print screen (regenerates if missing)
+router.get('/:id/labels', async (req, res, next) => {
+  try {
+    const fileId = parseInt(req.params.id, 10);
+    const result = await getFileLabels(pool, fileId);
+
+    if (result.reason === 'INVALID_ID') {
+      return res.status(400).json({ error: 'Invalid file id.' });
+    }
+    if (result.reason === 'NOT_FOUND') {
+      return res.status(404).json({ error: 'File not found.' });
+    }
+
+    return res.status(200).json(result.data);
   } catch (err) {
     next(err);
   }
@@ -113,12 +157,17 @@ router.post('/', requireRole('revenue_inspector'), async (req, res, next) => {
 // GET /files/:id — basic detail view for the file detail screen
 router.get('/:id', async (req, res, next) => {
   try {
+    const fileId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(fileId) || fileId <= 0) {
+      return res.status(400).json({ error: 'Invalid file id.' });
+    }
+
     const result = await pool.query(
       `SELECT f.*, s.stage_name
        FROM files f
        JOIN stages s ON f.current_stage_id = s.id
        WHERE f.id = $1`,
-      [req.params.id]
+      [fileId]
     );
 
     if (result.rows.length === 0) {
