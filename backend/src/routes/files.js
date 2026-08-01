@@ -163,9 +163,19 @@ router.get('/:id', async (req, res, next) => {
     }
 
     const result = await pool.query(
-      `SELECT f.*, s.stage_name
+      `SELECT f.*, s.stage_name, s.id AS stage_id, s.sla_hours,
+              holder.full_name AS current_holder_name,
+              pending.full_name AS pending_holder_name,
+              EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage,
+              CASE WHEN f.pending_holder_id IS NOT NULL THEN (
+                SELECT cl.to_stage_id FROM custody_log cl
+                WHERE cl.file_id = f.id AND cl.transition_type = 'dispatch'
+                ORDER BY cl.scanned_at DESC LIMIT 1
+              ) END AS pending_to_stage_id
        FROM files f
        JOIN stages s ON f.current_stage_id = s.id
+       LEFT JOIN users holder ON f.current_holder_id = holder.id
+       LEFT JOIN users pending ON f.pending_holder_id = pending.id
        WHERE f.id = $1`,
       [fileId]
     );

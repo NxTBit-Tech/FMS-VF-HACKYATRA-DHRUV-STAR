@@ -43,10 +43,6 @@ function HomeRedirect() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role === 'revenue_inspector') {
-    return <Navigate to="/upload" replace />;
-  }
-
   if (user.role === 'commissioner') {
     return <Navigate to="/analytics" replace />;
   }
@@ -87,11 +83,11 @@ export default function App() {
           }
         />
 
-        {/* Officers Dashboard (TPO, AE, EE) */}
+        {/* Officers Dashboard (RI, TPO, AE, EE) */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['town_planning_officer', 'assistant_engineer', 'executive_engineer']}>
+            <ProtectedRoute allowedRoles={['revenue_inspector', 'town_planning_officer', 'assistant_engineer', 'executive_engineer']}>
               <Dashboard />
             </ProtectedRoute>
           }

@@ -19,47 +19,46 @@ export default function Upload() {
   const successCardRef = useRef(null);
 
   useEffect(() => {
-    if (createdFile) {
-      // Render QR code onto canvas
-      if (qrCanvasRef.current) {
-        QRCode.toCanvas(
-          qrCanvasRef.current,
-          createdFile.qr_payload,
-          { width: 180, margin: 1 },
-          (err) => {
-            if (err) console.error('QR rendering error:', err);
-          }
+    if (!createdFile) return;
+
+    // Client-side fallback labels (matches server payloads for print preview)
+    if (qrCanvasRef.current && createdFile.qr_payload) {
+      QRCode.toCanvas(
+        qrCanvasRef.current,
+        createdFile.qr_payload,
+        { width: 180, margin: 1 },
+        (err) => {
+          if (err) console.error('QR rendering error:', err);
+        }
+      );
+    }
+
+    if (barcodeSvgRef.current && createdFile.barcode_payload) {
+      try {
+        JsBarcode(barcodeSvgRef.current, createdFile.barcode_payload, {
+          format: 'CODE128',
+          width: 2,
+          height: 60,
+          displayValue: true,
+          fontSize: 12,
+          textMargin: 4,
+          background: '#ffffff',
+          lineColor: '#000000',
+        });
+      } catch (err) {
+        console.error('Barcode rendering error:', err);
+      }
+    }
+
+    setTimeout(() => {
+      if (successCardRef.current) {
+        gsap.fromTo(
+          successCardRef.current,
+          { scale: 0.95, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.5)' }
         );
       }
-      
-      // Render Barcode onto SVG
-      if (barcodeSvgRef.current) {
-        try {
-          JsBarcode(barcodeSvgRef.current, createdFile.barcode_payload, {
-            format: 'CODE128',
-            width: 2,
-            height: 60,
-            displayValue: true,
-            fontSize: 12,
-            textMargin: 4,
-            background: '#ffffff',
-            lineColor: '#000000',
-          });
-        } catch (err) {
-          console.error('Barcode rendering error:', err);
-        }
-      }
-
-      // GSAP Entrance
-      setTimeout(() => {
-        if (successCardRef.current) {
-          gsap.fromTo(successCardRef.current,
-            { scale: 0.95, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.5)' }
-          );
-        }
-      }, 50);
-    }
+    }, 50);
   }, [createdFile]);
 
   const handleSubmit = async (e) => {
@@ -222,14 +221,30 @@ export default function Upload() {
                   GVMC DEPARTMENTAL FILE LABEL
                 </h4>
                 
-                {/* QR Code Canvas */}
+                {/* QR — prefer server PNG (same bytes officers scan) */}
                 <div className="mb-4 bg-white p-2 border border-govBlue-200 rounded">
-                  <canvas ref={qrCanvasRef}></canvas>
+                  {createdFile.qr_image_path ? (
+                    <img
+                      src={createdFile.qr_image_path}
+                      alt="QR label"
+                      className="w-[180px] h-[180px] mx-auto"
+                    />
+                  ) : (
+                    <canvas ref={qrCanvasRef} />
+                  )}
                 </div>
 
-                {/* Code128 Barcode */}
+                {/* Code128 — prefer server PNG */}
                 <div className="mb-4">
-                  <svg ref={barcodeSvgRef} className="mx-auto"></svg>
+                  {createdFile.barcode_image_path ? (
+                    <img
+                      src={createdFile.barcode_image_path}
+                      alt="Barcode label"
+                      className="mx-auto max-w-full"
+                    />
+                  ) : (
+                    <svg ref={barcodeSvgRef} className="mx-auto" />
+                  )}
                 </div>
 
                 <div className="text-[10px] font-stamp text-govBlue-900">

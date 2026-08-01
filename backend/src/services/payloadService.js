@@ -22,8 +22,14 @@ function buildBarcodePayload({ referenceNumber }) {
 
 /**
  * Normalize raw scanner output to a reference number + scan kind.
- * Handles: Code128 plain ref, QR JSON blob, URL-encoded text.
+ * Handles: Code128 plain ref, QR JSON blob, URL-encoded text, GS1 prefixes.
  */
+function extractReferenceNumber(text) {
+  const refMatch = text.match(/TP-\d{8}-\d{4}/i);
+  if (refMatch) return refMatch[0].toUpperCase();
+  return text.trim();
+}
+
 function resolveScanInput(raw) {
   if (raw == null) return null;
 
@@ -36,11 +42,14 @@ function resolveScanInput(raw) {
     // use as-is if not URI-encoded
   }
 
+  text = text.replace(/[\x00-\x1f\x7f]/g, '').trim();
+
   try {
     const parsed = JSON.parse(text);
     if (parsed && typeof parsed.referenceNumber === 'string' && parsed.referenceNumber.trim()) {
+      const referenceNumber = extractReferenceNumber(parsed.referenceNumber);
       return {
-        referenceNumber: parsed.referenceNumber.trim(),
+        referenceNumber,
         rawPayload: text,
         scanType: 'qr',
       };
@@ -49,9 +58,10 @@ function resolveScanInput(raw) {
     // not JSON — barcode or typed reference
   }
 
+  const referenceNumber = extractReferenceNumber(text);
   return {
-    referenceNumber: text.trim(),
-    rawPayload: text,
+    referenceNumber,
+    rawPayload: referenceNumber,
     scanType: 'barcode',
   };
 }

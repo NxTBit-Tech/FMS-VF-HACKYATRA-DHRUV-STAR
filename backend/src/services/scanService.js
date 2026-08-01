@@ -15,12 +15,18 @@ const FILE_SCAN_SQL = `
          holder.full_name AS current_holder_name,
          holder.role AS current_holder_role,
          pending.full_name AS pending_holder_name,
-         EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage
+         EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage,
+         CASE WHEN f.pending_holder_id IS NOT NULL THEN (
+           SELECT cl.to_stage_id FROM custody_log cl
+           WHERE cl.file_id = f.id AND cl.transition_type = 'dispatch'
+           ORDER BY cl.scanned_at DESC LIMIT 1
+         ) END AS pending_to_stage_id
   FROM files f
   JOIN stages s ON f.current_stage_id = s.id
   LEFT JOIN users holder ON f.current_holder_id = holder.id
   LEFT JOIN users pending ON f.pending_holder_id = pending.id
-  WHERE f.reference_number = $1
+  WHERE UPPER(f.reference_number) = UPPER($1)
+     OR UPPER(f.barcode_payload) = UPPER($1)
      OR f.barcode_payload = $2
      OR f.qr_payload = $2
   LIMIT 1
@@ -34,7 +40,12 @@ const FILE_BY_ID_SQL = `
          holder.full_name AS current_holder_name,
          holder.role AS current_holder_role,
          pending.full_name AS pending_holder_name,
-         EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage
+         EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage,
+         CASE WHEN f.pending_holder_id IS NOT NULL THEN (
+           SELECT cl.to_stage_id FROM custody_log cl
+           WHERE cl.file_id = f.id AND cl.transition_type = 'dispatch'
+           ORDER BY cl.scanned_at DESC LIMIT 1
+         ) END AS pending_to_stage_id
   FROM files f
   JOIN stages s ON f.current_stage_id = s.id
   LEFT JOIN users holder ON f.current_holder_id = holder.id
@@ -77,6 +88,7 @@ function formatScanResponse(file, scanType, labelMeta = {}) {
           pendingHolderId: file.pending_holder_id,
           pendingHolderName: file.pending_holder_name,
           dispatchedAt: file.dispatched_at,
+          pendingToStageId: file.pending_to_stage_id,
         }
       : null,
   };

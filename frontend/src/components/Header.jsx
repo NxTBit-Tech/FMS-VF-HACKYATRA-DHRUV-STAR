@@ -18,6 +18,7 @@ export default function Header() {
   const navItems = [];
   
   if (user.role === 'revenue_inspector') {
+    navItems.push({ path: '/dashboard', label: 'My Dashboard', icon: Home });
     navItems.push({ path: '/upload', label: 'File Upload', icon: FilePlus });
   } else if (user.role === 'commissioner') {
     navItems.push({ path: '/analytics', label: 'Analytics', icon: BarChart2 });
@@ -43,7 +44,7 @@ export default function Header() {
               GVMC File Management
             </Link>
             <span className="text-[10px] text-govBlue-700 block uppercase tracking-wider -mt-0.5 font-semibold">
-              {user.department} Dept
+              Town Planning
             </span>
           </div>
         </div>

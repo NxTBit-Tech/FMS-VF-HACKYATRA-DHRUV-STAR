@@ -48,9 +48,6 @@ export default function Login() {
 
   const redirectByRole = (role) => {
     switch (role) {
-      case 'revenue_inspector':
-        navigate('/upload');
-        break;
       case 'commissioner':
         navigate('/analytics');
         break;

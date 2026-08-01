@@ -12,6 +12,7 @@
   "dependencies": {
     "@yudiel/react-qr-scanner": "^2.6.0",
     "gsap": "^3.15.0",
+    "html5-qrcode": "^2.3.8",
     "jsbarcode": "^3.12.3",
     "lucide-react": "^1.28.0",
     "qrcode": "^1.5.4",

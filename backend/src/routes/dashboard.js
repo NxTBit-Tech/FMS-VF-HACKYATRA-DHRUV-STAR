@@ -22,7 +22,11 @@ router.get('/sla-violations', async (req, res, next) => {
        JOIN stages s ON f.current_stage_id = s.id
        WHERE f.status = 'in_progress'
          AND EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 > s.sla_hours
-         AND ($1 = 'commissioner' OR f.current_holder_id = $2)
+         AND (
+           $1 = 'commissioner'
+           OR f.current_holder_id = $2
+           OR f.pending_holder_id = $2
+         )
        ORDER BY hours_at_stage DESC`,
       [role, userId]
     );
@@ -40,12 +44,22 @@ router.get('/pending', async (req, res, next) => {
     const { role, userId } = req.dashboardScope;
 
     const result = await pool.query(
-      `SELECT f.reference_number, s.stage_name, f.stage_entered_at, s.sla_hours,
-              EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage
+      `SELECT f.reference_number, f.id AS file_id, s.stage_name, f.stage_entered_at, s.sla_hours,
+              f.current_holder_id, f.pending_holder_id,
+              EXTRACT(EPOCH FROM (now() - f.stage_entered_at)) / 3600 AS hours_at_stage,
+              CASE
+                WHEN f.pending_holder_id = $2 THEN 'awaiting_receive'
+                WHEN f.current_holder_id = $2 THEN 'on_desk'
+                ELSE 'other'
+              END AS queue_reason
        FROM files f
        JOIN stages s ON f.current_stage_id = s.id
        WHERE f.status = 'in_progress'
-         AND ($1 = 'commissioner' OR f.current_holder_id = $2)
+         AND (
+           $1 = 'commissioner'
+           OR f.current_holder_id = $2
+           OR f.pending_holder_id = $2
+         )
        ORDER BY hours_at_stage DESC`,
       [role, userId]
     );

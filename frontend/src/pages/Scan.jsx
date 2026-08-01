@@ -6,15 +6,39 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import { QrCode, AlertTriangle, FileText, ArrowRight, UserCheck, Shield, Send, Check } from 'lucide-react';
 import gsap from 'gsap';
 
+const OFFICERS_ROSTER = [
+  { id: 1, name: 'Rajesh Kumar (Revenue Inspector)', role: 'revenue_inspector' },
+  { id: 2, name: 'Priya Sharma (Town Planning Officer)', role: 'town_planning_officer' },
+  { id: 3, name: 'Amit Patel (Assistant Engineer)', role: 'assistant_engineer' },
+  { id: 4, name: 'Vikram Singh (Executive Engineer)', role: 'executive_engineer' },
+  { id: 5, name: 'S. Srinivasan (Commissioner)', role: 'commissioner' },
+];
+
+const getStageInfo = (stageId) => {
+  switch (stageId) {
+    case 1: return { name: 'Submitted', nextStageId: 2, nextRole: 'town_planning_officer', prevStageId: null };
+    case 2: return { name: 'Under Review', nextStageId: 3, nextRole: 'assistant_engineer', prevStageId: 1 };
+    case 3: return { name: 'Site Inspection', nextStageId: 4, nextRole: 'executive_engineer', prevStageId: 2 };
+    case 4: return { name: 'Final Approval', nextStageId: 5, nextRole: 'commissioner', prevStageId: 3 };
+    case 5: return { name: 'Commissioner Review', nextStageId: null, nextRole: null, prevStageId: 4 };
+    default: return { name: 'Unknown', nextStageId: null, nextRole: null, prevStageId: null };
+  }
+};
+
 export default function Scan() {
   const [scanData, setScanData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [manualRef, setManualRef] = useState('');
   const [cameraActive, setCameraActive] = useState(true);
+
+  // Transition & Dispatch states
+  const [transitionLoading, setTransitionLoading] = useState(false);
+  const [recipientId, setRecipientId] = useState('');
+  const [customRecipientId, setCustomRecipientId] = useState('');
+
   const user = getUser();
   const navigate = useNavigate();
-
   const resultCardRef = useRef(null);
 
   const handleScanSuccess = async (text) => {
@@ -33,14 +57,23 @@ export default function Scan() {
       setScanData(data);
       
       // GSAP slide and reveal result card
-      setTimeout(() => {
-        if (resultCardRef.current) {
-          gsap.fromTo(resultCardRef.current,
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }
-          );
-        }
-      }, 50);
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReducedMotion) {
+        setTimeout(() => {
+          if (resultCardRef.current) {
+            gsap.fromTo(resultCardRef.current,
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
+            );
+          }
+        }, 50);
+      } else {
+        setTimeout(() => {
+          if (resultCardRef.current) {
+            gsap.set(resultCardRef.current, { opacity: 1, y: 0 });
+          }
+        }, 50);
+      }
     } catch (err) {
       setError(err.message || 'File lookup failed. The barcode or QR code may be invalid.');
       setCameraActive(true);
@@ -63,9 +96,70 @@ export default function Scan() {
     const isHolder = scanData.currentHolder?.id === user.id;
     const isPending = scanData.pendingHandoff?.pendingHolderId === user.id;
 
-    // Commissioner can't modify/move custody (they only review terminal approval stages)
     return isHolder || isPending;
   };
+
+  const handleDispatchDirect = async (toStageId) => {
+    setTransitionLoading(true);
+    setError('');
+    try {
+      const finalNextHolderId = customRecipientId || recipientId;
+      const payload = {
+        transitionType: 'dispatch',
+        toStageId: parseInt(toStageId, 10),
+      };
+      if (finalNextHolderId) {
+        payload.nextHolderId = parseInt(finalNextHolderId, 10);
+      }
+      await api.post(`/files/${scanData.fileId}/transition`, payload);
+      setRecipientId('');
+      setCustomRecipientId('');
+      // Refresh scan lookup
+      await lookupFile(scanData.referenceNumber);
+    } catch (err) {
+      setError(err.message || 'Transition rejected by validator.');
+    } finally {
+      setTransitionLoading(false);
+    }
+  };
+
+  const handleReceiveDirect = async () => {
+    setTransitionLoading(true);
+    setError('');
+    try {
+      const payload = {
+        transitionType: 'receive',
+        toStageId: parseInt(scanData.currentStage.id, 10),
+      };
+      await api.post(`/files/${scanData.fileId}/transition`, payload);
+      // Refresh scan lookup
+      await lookupFile(scanData.referenceNumber);
+    } catch (err) {
+      setError(err.message || 'Handoff pickup confirmation failed.');
+    } finally {
+      setTransitionLoading(false);
+    }
+  };
+
+  const handleTerminalDirect = async (transitionType) => {
+    setTransitionLoading(true);
+    setError('');
+    try {
+      const payload = {
+        transitionType,
+      };
+      await api.post(`/files/${scanData.fileId}/transition`, payload);
+      await lookupFile(scanData.referenceNumber);
+    } catch (err) {
+      setError(err.message || 'Action failed.');
+    } finally {
+      setTransitionLoading(false);
+    }
+  };
+
+  const isHolder = scanData?.currentHolder?.id === user?.id;
+  const isPending = scanData?.pendingHandoff?.pendingHolderId === user?.id;
+  const isInTransit = scanData?.pendingHandoff !== null;
 
   return (
     <div className="max-w-md mx-auto px-4 py-8">
@@ -88,7 +182,12 @@ export default function Scan() {
       {cameraActive && !loading && (
         <div className="relative rounded-lg overflow-hidden border border-govBlue-200 bg-white mb-6 aspect-square shadow-sm">
           <Scanner
-            onResult={(text) => handleScanSuccess(text)}
+            onScan={(detectedCodes) => {
+              const text = detectedCodes[0]?.rawValue;
+              if (text) {
+                handleScanSuccess(text);
+              }
+            }}
             onError={(err) => {
               console.log('Scanner error:', err);
             }}
@@ -186,15 +285,109 @@ export default function Scan() {
           {/* Action Box */}
           <div className="pt-6">
             {canAction() ? (
-              <div className="space-y-3">
-                <p className="text-[10px] text-sla-green font-bold uppercase tracking-wider mb-2">
-                  ✓ Verification Approved: Access rights granted.
-                </p>
+              <div className="space-y-4">
+                {transitionLoading ? (
+                  <div className="py-4 text-center text-xs font-bold uppercase tracking-wider text-govBlue-750 flex justify-center items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-govBlue-900 border-r-transparent border-b-govBlue-900 border-l-transparent"></div>
+                    Mutating custody registry...
+                  </div>
+                ) : (
+                  <>
+                    {/* Scenario A: User is the pending holder -> confirm receive */}
+                    {isPending && (
+                      <div className="space-y-3">
+                        <p className="text-[10px] text-sla-green font-bold uppercase tracking-wider">
+                          ✓ Scanned: You are the pending recipient. Confirm pickup below.
+                        </p>
+                        <button
+                          onClick={handleReceiveDirect}
+                          className="w-full py-3 px-4 bg-sla-green hover:bg-opacity-95 text-white font-bold uppercase tracking-wider text-xs rounded border border-sla-green shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                        >
+                          Confirm Physical Receipt (Receive File)
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Scenario B: User is current holder and not in transit -> dispatch */}
+                    {isHolder && !isInTransit && (
+                      <div className="space-y-4">
+                        {/* Terminal decisions for EE/Commissioner */}
+                        {(scanData.currentStage.id === 4 || scanData.currentStage.id === 5) && (
+                          <div className="p-3 bg-govBlue-100 rounded border border-govBlue-200 flex flex-col gap-2">
+                            <span className="text-[10px] font-bold text-govBlue-900 uppercase">Terminal Resolution:</span>
+                            <div className="flex gap-2 w-full">
+                              <button
+                                onClick={() => handleTerminalDirect('terminal_approve')}
+                                className="flex-1 py-2 bg-sla-green hover:bg-opacity-95 text-white text-xs font-bold uppercase rounded border border-sla-green transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleTerminalDirect('terminal_reject')}
+                                className="flex-1 py-2 bg-sla-red hover:bg-opacity-95 text-white text-xs font-bold uppercase rounded border border-sla-red transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Dispatch section */}
+                        {(() => {
+                          const stageInfo = getStageInfo(scanData.currentStage.id);
+                          if (!stageInfo.nextStageId) return null;
+                          const allowedRecipients = OFFICERS_ROSTER.filter(o => o.role === stageInfo.nextRole);
+                          return (
+                            <div className="space-y-3 pt-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-govBlue-700 block">Dispatch Handoff ({stageInfo.nextRole?.replace('_', ' ')})</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <select
+                                  value={recipientId}
+                                  onChange={(e) => setRecipientId(e.target.value)}
+                                  className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
+                                >
+                                  <option value="">-- Choose Officer --</option>
+                                  {allowedRecipients.map(o => (
+                                    <option key={o.id} value={o.id}>{o.name}</option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="number"
+                                  placeholder="Or custom ID"
+                                  value={customRecipientId}
+                                  onChange={(e) => setCustomRecipientId(e.target.value)}
+                                  className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
+                                />
+                              </div>
+                              <button
+                                onClick={() => handleDispatchDirect(stageInfo.nextStageId)}
+                                disabled={!recipientId && !customRecipientId}
+                                className="w-full py-2.5 px-4 bg-govBlue-900 hover:bg-govBlue-850 disabled:opacity-50 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                              >
+                                <Send className="h-3.5 w-3.5 inline mr-1" /> Dispatch Handoff
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {/* Scenario C: User is current holder but in transit */}
+                    {isHolder && isInTransit && (
+                      <div className="p-3.5 bg-govBlue-100 border border-govBlue-200 rounded text-center">
+                        <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider">
+                          ⌛ Dispatched: Awaiting verification scan from {scanData.pendingHandoff.pendingHolderName}.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <button
                   onClick={() => navigate(`/files/${scanData.fileId}`)}
-                  className="w-full py-3 px-4 bg-govBlue-900 hover:bg-govBlue-850 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
+                  className="w-full mt-2 py-2.5 px-4 bg-white hover:bg-govBlue-100 text-govBlue-900 font-bold uppercase tracking-wider text-xs rounded border border-govBlue-200 shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                  Proceed to Handoff / Action Panel
+                  View Full History & Files Dossier
                 </button>
               </div>
             ) : (

@@ -37,6 +37,7 @@ app.use(verifyJWT);
 app.use('/files', require('./routes/scan'));
 app.use('/files', require('./routes/files'));
 app.use('/files', require('./routes/transitions'));
+app.use('/users', require('./routes/users'));
 app.use('/dashboard', scopeDashboard, require('./routes/dashboard'));
 
 // workflows.js not yet built — placeholder mount, commented out until ready:
