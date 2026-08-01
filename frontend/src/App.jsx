@@ -54,14 +54,12 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Citizen Portal */}
+        {/* Public Citizen Portal (Landing Page) */}
+        <Route path="/" element={<CitizenStatus />} />
         <Route path="/status" element={<CitizenStatus />} />
         
         {/* Authentication */}
         <Route path="/login" element={<Login />} />
-
-        {/* Home Route (Role-based redirect) */}
-        <Route path="/" element={<HomeRedirect />} />
 
         {/* Revenue Inspector File Upload */}
         <Route

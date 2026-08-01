@@ -1,6 +1,6 @@
 // src/pages/CitizenStatus.jsx
 import React, { useState } from 'react';
-import { api } from '../services/api';
+import { api, getUser } from '../services/api';
 import { Search, ShieldAlert, CheckCircle, Clock, FileText } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -147,9 +147,15 @@ export default function CitizenStatus() {
       </div>
 
       <div className="text-center pt-8 text-xs font-bold uppercase tracking-wider text-govBlue-700">
-        <a href="/login" className="hover:text-govBlue-900 underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
-          Officer Portal Authentication &rarr;
-        </a>
+        {getUser() ? (
+          <a href={getUser().role === 'commissioner' ? '/analytics' : '/dashboard'} className="hover:text-govBlue-900 underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
+            Go to Officer Dashboard &rarr;
+          </a>
+        ) : (
+          <a href="/login" className="hover:text-govBlue-900 underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
+            Officer Portal Authentication &rarr;
+          </a>
+        )}
       </div>
     </div>
   );
