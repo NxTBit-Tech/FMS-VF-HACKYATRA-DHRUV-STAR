@@ -163,28 +163,49 @@ export default function FileActions({ file: rawFile, user, officers = [], onSucc
                 Forward to {getStageLabel(forwardTarget)}
               </h3>
               {forwardRecipients.length === 0 ? (
-                <p className="text-xs text-sla-amber">
-                  No officers loaded for this handoff. Enter user ID from seed data or refresh.
-                </p>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-sla-amber font-bold uppercase tracking-wider">
+                    ★ Enter Recipient User ID manually:
+                  </p>
+                  <input
+                    type="number"
+                    placeholder="Recipient User ID"
+                    value={forwardRecipientId}
+                    onChange={(e) => setForwardRecipientId(e.target.value)}
+                    className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm focus:outline-none"
+                  />
+                </div>
               ) : (
-                <select
-                  value={forwardRecipientId}
-                  onChange={(e) => setForwardRecipientId(e.target.value)}
-                  className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm"
-                >
-                  <option value="">Select receiving officer</option>
-                  {forwardRecipients.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.full_name} (ID {o.id})
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-2">
+                  <select
+                    value={forwardRecipientId}
+                    onChange={(e) => setForwardRecipientId(e.target.value)}
+                    className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm focus:outline-none"
+                  >
+                    <option value="">Select receiving officer</option>
+                    {forwardRecipients.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.full_name} (ID {o.id})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-govBlue-700 font-bold uppercase">Or enter User ID manually:</span>
+                    <input
+                      type="number"
+                      placeholder="Recipient User ID"
+                      value={forwardRecipientId}
+                      onChange={(e) => setForwardRecipientId(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-govBlue-300 rounded text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
               )}
               <button
                 type="button"
                 disabled={!forwardRecipientId}
                 onClick={() => runTransition('dispatch', forwardTarget, forwardRecipientId)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-govBlue-900 text-white text-xs font-bold uppercase rounded disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-2 bg-govBlue-900 text-white text-xs font-bold uppercase rounded disabled:opacity-50 transition-opacity"
               >
                 <Send className="h-3.5 w-3.5" /> Dispatch
               </button>
@@ -196,23 +217,50 @@ export default function FileActions({ file: rawFile, user, officers = [], onSucc
               <h3 className="text-xs font-bold uppercase text-govBlue-900">
                 Send back to {getStageLabel(backwardTarget)}
               </h3>
-              <select
-                value={backwardRecipientId}
-                onChange={(e) => setBackwardRecipientId(e.target.value)}
-                className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm"
-              >
-                <option value="">Select officer</option>
-                {backwardRecipients.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.full_name} (ID {o.id})
-                  </option>
-                ))}
-              </select>
+              {backwardRecipients.length === 0 ? (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-sla-amber font-bold uppercase tracking-wider">
+                    ★ Enter Recipient User ID manually:
+                  </p>
+                  <input
+                    type="number"
+                    placeholder="Recipient User ID"
+                    value={backwardRecipientId}
+                    onChange={(e) => setBackwardRecipientId(e.target.value)}
+                    className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm focus:outline-none"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <select
+                    value={backwardRecipientId}
+                    onChange={(e) => setBackwardRecipientId(e.target.value)}
+                    className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm focus:outline-none"
+                  >
+                    <option value="">Select officer</option>
+                    {backwardRecipients.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.full_name} (ID {o.id})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-govBlue-700 font-bold uppercase">Or enter User ID manually:</span>
+                    <input
+                      type="number"
+                      placeholder="Recipient User ID"
+                      value={backwardRecipientId}
+                      onChange={(e) => setBackwardRecipientId(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-govBlue-300 rounded text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
               <button
                 type="button"
                 disabled={!backwardRecipientId}
                 onClick={() => runTransition('dispatch', backwardTarget, backwardRecipientId)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-white border border-govBlue-200 text-govBlue-900 text-xs font-bold uppercase rounded disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-2 bg-white border border-govBlue-200 text-govBlue-900 text-xs font-bold uppercase rounded disabled:opacity-50 transition-opacity"
               >
                 <Send className="h-3.5 w-3.5" /> Send Back
               </button>
