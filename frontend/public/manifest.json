@@ -1,0 +1,16 @@
+{
+  "name": "GVMC Departmental File Management System",
+  "short_name": "GVMC FMS",
+  "description": "SW63 Greater Visakhapatnam Municipal Corporation Departmental File Management and State Machine Tracking System.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#0F2E5C",
+  "icons": [
+    {
+      "src": "/gvmc-logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}

@@ -107,13 +107,20 @@ export default function Login() {
         </div>
 
         <div className="text-center mb-8">
-          <div ref={titleRef} className="flex justify-center items-center mb-3">
-            <span className="stamp-badge stamp-red text-xs px-3 py-1 font-stamp tracking-wider">
-              GVMC DEPARTMENTAL
+          <div ref={titleRef} className="flex flex-col items-center mb-4">
+            <div className="h-16 w-16 bg-white rounded border border-govBlue-200 p-1.5 flex items-center justify-center shadow-sm mb-3">
+              <img src="/gvmc-logo.webp" alt="GVMC Logo" className="h-full w-full object-contain" />
+            </div>
+            <span className="text-[9px] text-govBlue-700 font-extrabold uppercase tracking-wider block">
+              Greater Visakhapatnam Municipal Corporation
             </span>
           </div>
-          <h1 className="text-2xl font-serif font-extrabold text-govBlue-900 tracking-tight">File Management</h1>
-          <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-1">Town Planning & Custody Registry</p>
+          <h1 className="text-xl font-serif font-extrabold text-govBlue-900 tracking-tight leading-tight">
+            Departmental File Management
+          </h1>
+          <p className="text-[10px] text-sla-red font-stamp font-bold tracking-widest uppercase mt-1.5">
+            ★ RESTRICTED ACCESS — OFFICER PORTAL ★
+          </p>
         </div>
 
         {error && (

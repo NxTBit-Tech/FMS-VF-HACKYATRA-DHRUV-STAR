@@ -36,8 +36,8 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full bg-govBlue-100 border-b border-govBlue-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-govBlue-900 rounded border border-govBlue-500 flex items-center justify-center font-serif font-bold text-govBlue-50 text-base tracking-wider shadow-inner">
-            GV
+          <div className="h-9 w-9 bg-white rounded border border-govBlue-200 flex items-center justify-center shadow-sm overflow-hidden p-0.5">
+            <img src="/gvmc-logo.webp" alt="GVMC Logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <Link to="/" className="text-sm font-serif font-extrabold text-govBlue-900 tracking-wide block hover:text-govBlue-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
