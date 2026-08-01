@@ -9,7 +9,7 @@ const router = express.Router();
 const pool = require('../db/pool');
 const { requireRole } = require('../middleware/requireRole');
 const { buildQrPayload, buildBarcodePayload } = require('../services/payloadService');
-const { generateLabelImages } = require('../services/labelService');
+const { generateLabelImages, ensureLabelsForFile } = require('../services/labelService');
 const { getFileLabels } = require('../services/scanService');
 
 function generateReferenceNumber() {
@@ -184,7 +184,16 @@ router.get('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'File not found.' });
     }
 
-    res.status(200).json(result.rows[0]);
+    const file = result.rows[0];
+    try {
+      const labelMeta = await ensureLabelsForFile(pool, file);
+      file.qr_image_path = labelMeta.qrImagePath;
+      file.barcode_image_path = labelMeta.barcodeImagePath;
+    } catch (err) {
+      console.error('Failed to auto-heal labels:', err);
+    }
+
+    res.status(200).json(file);
   } catch (err) {
     next(err);
   }
