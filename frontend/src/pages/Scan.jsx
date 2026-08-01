@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, getUser } from '../services/api';
-import { Scanner } from '@yudiel/react-qr-scanner';
+import { Html5Qrcode } from 'html5-qrcode';
 import { QrCode, AlertTriangle, FileText, ArrowRight, UserCheck, Shield, Send, Check } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -30,7 +30,7 @@ export default function Scan() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [manualRef, setManualRef] = useState('');
-  const [cameraActive, setCameraActive] = useState(true);
+  const [cameraActive, setCameraActive] = useState(false);
 
   // Transition & Dispatch states
   const [transitionLoading, setTransitionLoading] = useState(false);
@@ -39,11 +39,21 @@ export default function Scan() {
 
   const user = getUser();
   const navigate = useNavigate();
+  
+  const html5QrCodeRef = useRef(null);
   const resultCardRef = useRef(null);
+
+  useEffect(() => {
+    // Cleanup scanning stream when unmounting
+    return () => {
+      if (html5QrCodeRef.current) {
+        html5QrCodeRef.current.stop().catch(() => {});
+      }
+    };
+  }, []);
 
   const handleScanSuccess = async (text) => {
     if (!text) return;
-    setCameraActive(false);
     await lookupFile(text);
   };
 
@@ -76,7 +86,81 @@ export default function Scan() {
       }
     } catch (err) {
       setError(err.message || 'File lookup failed. The barcode or QR code may be invalid.');
-      setCameraActive(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startCamera = async () => {
+    setError('');
+    setCameraActive(true);
+    setScanData(null);
+    
+    // Allow DOM to render reader div
+    setTimeout(async () => {
+      try {
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCodeRef.current = html5QrCode;
+        
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: (width, height) => {
+              const size = Math.min(width, height) * 0.75;
+              return { width: size, height: size };
+            }
+          },
+          async (decodedText) => {
+            // Stop scanning and turn off camera upon success
+            try {
+              await html5QrCode.stop();
+            } catch (e) {
+              console.error(e);
+            }
+            setCameraActive(false);
+            await handleScanSuccess(decodedText);
+          },
+          () => {
+            // Keep scan active silently on scan mismatches
+          }
+        );
+      } catch (err) {
+        console.error("Camera error:", err);
+        setError("Live camera streaming is blocked. This happens if the website is deployed on HTTP instead of HTTPS (browsers block camera hardware on non-secure contexts). Please use the Image Upload/Photo scan or Manual Entry options below.");
+        setCameraActive(false);
+      }
+    }, 150);
+  };
+
+  const stopCamera = async () => {
+    if (html5QrCodeRef.current) {
+      try {
+        await html5QrCodeRef.current.stop();
+      } catch (e) {
+        console.error(e);
+      }
+      html5QrCodeRef.current = null;
+    }
+    setCameraActive(false);
+  };
+
+  const handleFileScan = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setLoading(true);
+    setError('');
+    setScanData(null);
+    setCameraActive(false);
+    
+    try {
+      const html5QrCode = new Html5Qrcode("file-scanner-temp");
+      const decodedText = await html5QrCode.scanFile(file, true);
+      await handleScanSuccess(decodedText);
+    } catch (err) {
+      console.error(err);
+      setError("No valid barcode or QR code detected. Please ensure the code is clear, centered, and well-lit in the image.");
     } finally {
       setLoading(false);
     }
@@ -178,28 +262,52 @@ export default function Scan() {
         </div>
       )}
 
-      {/* QR Code Scanner Container */}
+      {/* Live Camera Scanner Element */}
       {cameraActive && !loading && (
-        <div className="relative rounded-lg overflow-hidden border border-govBlue-200 bg-white mb-6 aspect-square shadow-sm">
-          <Scanner
-            onScan={(detectedCodes) => {
-              const text = detectedCodes[0]?.rawValue;
-              if (text) {
-                handleScanSuccess(text);
-              }
-            }}
-            onError={(err) => {
-              console.log('Scanner error:', err);
-            }}
-          />
-          <div className="absolute inset-0 border-2 border-dashed border-govBlue-500/40 pointer-events-none rounded-lg m-4 flex items-center justify-center">
-            <div className="w-10 h-10 border-t-4 border-l-4 border-sla-red absolute top-0 left-0"></div>
-            <div className="w-10 h-10 border-t-4 border-r-4 border-sla-red absolute top-0 right-0"></div>
-            <div className="w-10 h-10 border-b-4 border-l-4 border-sla-red absolute bottom-0 left-0"></div>
-            <div className="w-10 h-10 border-b-4 border-r-4 border-sla-red absolute bottom-0 right-0"></div>
-            <span className="stamp-badge stamp-red text-[10px] bg-white/95 px-3 py-1 font-stamp tracking-wider select-none shadow">
-              ALIGN CODE IN BRACKETS
-            </span>
+        <div className="relative rounded-lg overflow-hidden border border-govBlue-200 bg-black mb-6 aspect-square shadow-sm flex flex-col justify-between p-4">
+          <div id="reader" className="w-full h-full rounded"></div>
+          <button
+            onClick={stopCamera}
+            className="w-full py-2 bg-sla-red text-white text-xs font-bold uppercase rounded mt-3 shadow transition-opacity"
+          >
+            Cancel Live Camera
+          </button>
+        </div>
+      )}
+
+      {/* Control Actions / Scanner Selectors */}
+      {!scanData && !cameraActive && !loading && (
+        <div className="dossier-card p-6 rounded-lg mb-6 flex flex-col gap-4 text-center">
+          <h2 className="text-[10px] font-bold uppercase tracking-wider text-govBlue-700">Select Scanning Method</h2>
+          
+          <button
+            onClick={startCamera}
+            className="py-3 px-4 bg-govBlue-900 hover:bg-govBlue-850 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 shadow-sm flex items-center justify-center gap-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <QrCode className="h-4.5 w-4.5" /> Start Live Camera Stream
+          </button>
+          
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-dashed border-govBlue-200"></div>
+            <span className="flex-shrink mx-4 text-[9px] font-bold text-govBlue-700 uppercase tracking-widest">OR</span>
+            <div className="flex-grow border-t border-dashed border-govBlue-200"></div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-[9px] font-bold text-govBlue-700 uppercase tracking-wider mb-2">
+              Scan from Photo / Image File (Works on HTTP)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileScan}
+              className="block w-full text-xs text-govBlue-700
+                file:mr-4 file:py-2.5 file:px-4
+                file:rounded file:border-0
+                file:text-xs file:font-bold file:uppercase
+                file:bg-govBlue-100 file:text-govBlue-900
+                hover:file:bg-govBlue-200 cursor-pointer"
+            />
           </div>
         </div>
       )}
@@ -207,12 +315,12 @@ export default function Scan() {
       {loading && (
         <div className="dossier-card rounded-lg py-16 text-center mb-6 flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-govBlue-900 border-r-transparent border-b-govBlue-900 border-l-transparent"></div>
-          <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700">Resolving file identity details...</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700">Resolving code registry data...</span>
         </div>
       )}
 
       {/* Manual Input Fallback */}
-      {!scanData && !loading && (
+      {!scanData && !cameraActive && !loading && (
         <form onSubmit={handleManualSubmit} className="dossier-card p-5 rounded-lg mb-6">
           <h2 className="text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-3">Manual Registry Entry</h2>
           <div className="flex gap-2">
@@ -340,25 +448,40 @@ export default function Scan() {
                           return (
                             <div className="space-y-3 pt-2">
                               <span className="text-[10px] font-bold uppercase tracking-wider text-govBlue-700 block">Dispatch Handoff ({stageInfo.nextRole?.replace('_', ' ')})</span>
-                              <div className="grid grid-cols-2 gap-2">
-                                <select
-                                  value={recipientId}
-                                  onChange={(e) => setRecipientId(e.target.value)}
-                                  className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
-                                >
-                                  <option value="">-- Choose Officer --</option>
-                                  {allowedRecipients.map(o => (
-                                    <option key={o.id} value={o.id}>{o.name}</option>
-                                  ))}
-                                </select>
-                                <input
-                                  type="number"
-                                  placeholder="Or custom ID"
-                                  value={customRecipientId}
-                                  onChange={(e) => setCustomRecipientId(e.target.value)}
-                                  className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
-                                />
-                              </div>
+                              {allowedRecipients.length === 0 ? (
+                                <div className="space-y-1.5">
+                                  <p className="text-[10px] text-sla-amber font-bold uppercase tracking-wider">
+                                    ★ Enter Recipient User ID manually:
+                                  </p>
+                                  <input
+                                    type="number"
+                                    placeholder="Recipient User ID"
+                                    value={recipientId}
+                                    onChange={(e) => setRecipientId(e.target.value)}
+                                    className="w-full px-3 py-2 border border-govBlue-500 rounded text-sm focus:outline-none"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-2">
+                                  <select
+                                    value={recipientId}
+                                    onChange={(e) => setRecipientId(e.target.value)}
+                                    className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
+                                  >
+                                    <option value="">-- Choose Officer --</option>
+                                    {allowedRecipients.map(o => (
+                                      <option key={o.id} value={o.id}>{o.name}</option>
+                                    ))}
+                                  </select>
+                                  <input
+                                    type="number"
+                                    placeholder="Or custom ID"
+                                    value={customRecipientId}
+                                    onChange={(e) => setCustomRecipientId(e.target.value)}
+                                    className="px-2 py-1.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-xs focus:outline-none"
+                                  />
+                                </div>
+                              )}
                               <button
                                 onClick={() => handleDispatchDirect(stageInfo.nextStageId)}
                                 disabled={!recipientId && !customRecipientId}
@@ -401,8 +524,8 @@ export default function Scan() {
             <button
               onClick={() => {
                 setScanData(null);
-                setCameraActive(true);
                 setManualRef('');
+                stopCamera();
               }}
               className="w-full mt-4 py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-govBlue-700 hover:text-govBlue-900 transition-colors"
             >
@@ -411,6 +534,9 @@ export default function Scan() {
           </div>
         </div>
       )}
+
+      {/* Hidden container for file scanning fallback decoding */}
+      <div id="file-scanner-temp" style={{ display: 'none' }}></div>
     </div>
   );
 }
