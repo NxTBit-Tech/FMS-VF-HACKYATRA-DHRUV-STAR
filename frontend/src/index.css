@@ -1,52 +1,161 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Courier+Prime:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-parchment: #FAF6F0;
+  --color-manila: #F5EFEB;
+  --color-manila-dark: #EAE1CE;
+  --color-kraft: #D2C4A5;
+  --color-ink-blue: #14253D;
+  --color-carbon: #3F536B;
+  --color-seal-red: #B22222;
+  --color-stamp-green: #1E5A3C;
+  --color-stamp-amber: #A05A00;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
-  background-color: #030f26; /* Dark background matching our color system */
-  color: #d9e2ec;
+  background-color: var(--color-parchment);
+  color: var(--color-ink-blue);
+  background-image: radial-gradient(var(--color-kraft) 0.5px, var(--color-parchment) 0.5px);
+  background-size: 16px 16px;
+  background-attachment: fixed;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
+h1, h2, h3, h4, h5, h6, .font-serif {
+  font-family: 'Lora', Georgia, Cambria, "Times New Roman", Times, serif;
+  color: var(--color-ink-blue);
 }
 
-/* Premium UI Utilities */
-.glass {
-  background: rgba(11, 29, 51, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(217, 226, 236, 0.08);
+/* Tabular and Stamp typography */
+.font-stamp {
+  font-family: 'Courier Prime', Monaco, Consolas, "Courier New", monospace;
+  font-weight: 700;
 }
 
-.glass-light {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Physical Dossier Card Style */
+.dossier-card {
+  background-color: var(--color-manila);
+  border: 1px solid var(--color-kraft);
+  box-shadow: 2px 2px 0px 0px var(--color-kraft);
+  position: relative;
 }
 
-/* Scanner view overlays */
-.scanner-overlay {
-  box-shadow: 0 0 0 9999px rgba(3, 15, 38, 0.75);
+.dossier-card-hover:hover {
+  box-shadow: 4px 4px 0px 0px var(--color-carbon);
+  transform: translate(-2px, -2px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Custom transitions and scrollbars */
+/* The Case-File Tab signature element */
+.file-folder-tab {
+  position: absolute;
+  top: -24px;
+  left: 12px;
+  height: 24px;
+  padding: 2px 14px 0 14px;
+  background-color: var(--color-manila-dark);
+  border: 1px solid var(--color-kraft);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-family: 'Lora', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink-blue);
+  box-shadow: 1px -1px 1px rgba(0,0,0,0.03);
+}
+
+/* Traditional Distressed Ink Stamp style badge */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-width: 2.5px;
+  border-style: double;
+  border-radius: 4px;
+  transform: rotate(-1.5deg);
+  opacity: 0.9;
+  text-shadow: 0.5px 0.5px 0px rgba(255,255,255,0.4);
+  box-shadow: inset 0 0 2px rgba(0,0,0,0.05);
+}
+
+.stamp-green {
+  color: var(--color-stamp-green);
+  border-color: var(--color-stamp-green);
+  background-color: rgba(30, 90, 60, 0.06);
+}
+
+.stamp-amber {
+  color: var(--color-stamp-amber);
+  border-color: var(--color-stamp-amber);
+  background-color: rgba(160, 90, 0, 0.06);
+}
+
+.stamp-red {
+  color: var(--color-seal-red);
+  border-color: var(--color-seal-red);
+  background-color: rgba(178, 34, 34, 0.06);
+}
+
+.stamp-blue {
+  color: var(--color-ink-blue);
+  border-color: var(--color-ink-blue);
+  background-color: rgba(20, 37, 61, 0.06);
+}
+
+/* Ledger Line journal entry list styling */
+.ledger-row {
+  border-bottom: 1px dashed var(--color-kraft);
+}
+.ledger-row:last-child {
+  border-bottom: none;
+}
+
+/* Custom Scrollbar for Ledger Sheets */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(3, 15, 38, 0.5);
+  background: var(--color-manila);
+  border-left: 1px solid var(--color-kraft);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(217, 226, 236, 0.2);
-  border-radius: 3px;
+  background: var(--color-kraft);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(217, 226, 236, 0.4);
+  background: var(--color-carbon);
 }
+
+/* Keyboard Accessibility Focus Outline (Non-Negotiable Focus States) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-seal-red) !important;
+  outline-offset: 2px !important;
+}
+
+/* Form controls */
+input, select, textarea {
+  background-color: #FFFFFF !important;
+  color: var(--color-ink-blue) !important;
+  border: 1px solid var(--color-kraft) !important;
+  border-radius: 4px !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-ink-blue) !important;
+  box-shadow: 0 0 0 2px rgba(20, 37, 61, 0.1) !important;
+}
+

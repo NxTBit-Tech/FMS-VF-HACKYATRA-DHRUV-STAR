@@ -131,45 +131,47 @@ export default function FileDetail() {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate('/dashboard')}
-          className="text-xs text-govBlue-200 hover:text-white transition-colors"
+          className="text-xs font-bold uppercase tracking-wider text-govBlue-700 hover:text-govBlue-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
         >
           &larr; Back to Dashboard
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl text-sm flex gap-2">
-          <AlertTriangle className="h-5 w-5 text-red-400 shrink-0" />
+        <div className="mb-6 p-4 bg-sla-red/5 border border-sla-red/30 text-sla-red rounded text-xs font-semibold">
           <span>{error}</span>
         </div>
       )}
 
-      {/* Main File Detail Card */}
-      <div className="glass rounded-2xl p-6 border border-govBlue-700/50 mb-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none"></div>
+      {/* Main File Detail Dossier Card */}
+      <div className="dossier-card rounded-lg p-6 mb-8 relative overflow-hidden mt-6">
+        {/* Case-File Tab signature element */}
+        <div className="file-folder-tab font-stamp">
+          REF: {file.reference_number}
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-govBlue-700/40 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-dashed border-govBlue-200 gap-4 mt-2">
           <div className="flex items-start gap-4">
-            <div className="p-3.5 bg-blue-500/10 rounded-xl text-blue-400 border border-blue-500/20">
+            <div className="p-3.5 bg-govBlue-100 rounded border border-govBlue-200 text-govBlue-900">
               <FileText className="h-7 w-7" />
             </div>
             <div>
-              <span className="text-[10px] text-govBlue-200 uppercase tracking-wider font-semibold">Reference Number</span>
-              <h1 className="text-2xl font-extrabold text-white leading-tight">{file.reference_number}</h1>
-              <p className="text-xs text-govBlue-200 mt-1">Created on {new Date(file.created_at).toLocaleDateString()}</p>
+              <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider block">Official Case Reference</span>
+              <h1 className="text-2xl font-serif font-extrabold text-govBlue-900 leading-tight mt-0.5">{file.reference_number}</h1>
+              <p className="text-xs text-govBlue-750 font-medium mt-1">Registry created on {new Date(file.created_at).toLocaleDateString()}</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-3 py-1.5 bg-govBlue-900 border border-govBlue-700 rounded-lg text-xs font-semibold text-white">
-              Stage: {file.stage_name}
+            <span className="stamp-badge stamp-blue text-[10px]">
+              {file.stage_name}
             </span>
-            <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase ${
+            <span className={`stamp-badge text-[10px] ${
               file.status === 'approved'
-                ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
+                ? 'stamp-green'
                 : file.status === 'rejected'
-                ? 'bg-red-500/15 border border-red-500/30 text-red-400'
-                : 'bg-blue-500/15 border border-blue-500/30 text-blue-300'
+                ? 'stamp-red'
+                : 'stamp-blue'
             }`}>
               {file.status}
             </span>
@@ -177,25 +179,25 @@ export default function FileDetail() {
         </div>
 
         {/* Applicant / Property Metadata */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6 border-b border-govBlue-700/40 text-sm">
-          <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6 border-b border-dashed border-govBlue-200 text-sm">
+          <div className="space-y-4">
             <div>
-              <span className="text-xs text-govBlue-200 block">Applicant Name</span>
-              <span className="font-semibold text-white block mt-0.5">{file.applicant_name}</span>
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Applicant Full Name</span>
+              <span className="font-serif font-extrabold text-govBlue-900 text-base mt-1 block">{file.applicant_name}</span>
             </div>
             <div>
-              <span className="text-xs text-govBlue-200 block">Applicant Contact</span>
-              <span className="font-semibold text-white block mt-0.5">{file.applicant_contact || 'N/A'}</span>
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Applicant Contact Contact</span>
+              <span className="font-medium text-govBlue-900 mt-1 block">{file.applicant_contact || 'None Documented'}</span>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <span className="text-xs text-govBlue-200 block">Property Location</span>
-              <span className="font-semibold text-white block mt-0.5">{file.property_address || 'N/A'}</span>
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Property / Site Address</span>
+              <span className="font-medium text-govBlue-900 mt-1 block">{file.property_address || 'None Documented'}</span>
             </div>
             <div>
-              <span className="text-xs text-govBlue-200 block">Department</span>
-              <span className="font-semibold text-white block mt-0.5">{file.department}</span>
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Assigned Bureau</span>
+              <span className="font-serif font-bold text-govBlue-900 mt-1 block">{file.department}</span>
             </div>
           </div>
         </div>
@@ -203,28 +205,28 @@ export default function FileDetail() {
         {/* Custody Info */}
         <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
-            <span className="text-xs text-govBlue-200 block">Current Custody</span>
-            <div className="flex items-center gap-2 mt-1.5 text-white">
-              <UserCheck className="h-4.5 w-4.5 text-blue-400" />
+            <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Active Custody Holder</span>
+            <div className="flex items-center gap-2 mt-2 text-govBlue-900">
+              <UserCheck className="h-5 w-5 text-govBlue-700 shrink-0" />
               <div>
-                <span className="font-semibold block leading-tight">
-                  {file.current_holder_id === user?.id ? 'Held by You' : `Officer ID: ${file.current_holder_id}`}
+                <span className="font-serif font-extrabold block leading-tight">
+                  {file.current_holder_id === user?.id ? 'Held by Your Office' : `Officer ID: ${file.current_holder_id}`}
                 </span>
-                <span className="text-[10px] text-govBlue-200 font-medium">Entered stage on {new Date(file.stage_entered_at).toLocaleString()}</span>
+                <span className="text-[10px] text-govBlue-700 block font-medium mt-0.5">Custody entered: {new Date(file.stage_entered_at).toLocaleString()}</span>
               </div>
             </div>
           </div>
 
           {isInTransit && (
             <div>
-              <span className="text-xs text-govBlue-200 block">Pending Transfer Handoff</span>
-              <div className="flex items-center gap-2 mt-1.5 text-amber-400 bg-amber-500/5 border border-amber-500/20 p-2.5 rounded-xl">
-                <ArrowRight className="h-4.5 w-4.5 shrink-0" />
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block">Pending Transit Status</span>
+              <div className="flex items-center gap-2 mt-2 text-sla-amber bg-sla-amber/5 border border-sla-amber/30 p-2.5 rounded">
+                <ArrowRight className="h-4.5 w-4.5 shrink-0 animate-pulse" />
                 <div>
-                  <span className="font-semibold block leading-tight">
-                    {file.pending_holder_id === user?.id ? 'Sent to You' : `Recipient ID: ${file.pending_holder_id}`}
+                  <span className="font-serif font-extrabold block leading-tight">
+                    {file.pending_holder_id === user?.id ? 'Sent to You (Action Required)' : `In Transit to Officer ID: ${file.pending_holder_id}`}
                   </span>
-                  <span className="text-[10px] text-amber-500/80 block">Dispatched at {new Date(file.dispatched_at).toLocaleString()}</span>
+                  <span className="text-[9px] text-govBlue-750 block font-bold mt-0.5">Dispatched: {new Date(file.dispatched_at).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -234,15 +236,15 @@ export default function FileDetail() {
 
       {/* Action / State Machine Controls */}
       {file.status === 'in_progress' && (
-        <div className="glass rounded-2xl p-6 border border-govBlue-700/50 mb-8">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-4 flex items-center gap-2">
-            <Shield className="h-4.5 w-4.5 text-blue-400" />
-            Custody Handoff panel
+        <div className="dossier-card rounded-lg p-6 mb-8">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-govBlue-900 mb-4 flex items-center gap-2">
+            <Shield className="h-4.5 w-4.5 text-govBlue-700" />
+            Registry Custody Controls
           </h2>
 
           {transitionLoading && (
-            <div className="py-4 text-center text-xs text-govBlue-200 flex justify-center items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent"></div>
+            <div className="py-4 text-center text-xs font-bold uppercase tracking-wider text-govBlue-750 flex justify-center items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-govBlue-900 border-r-transparent border-b-govBlue-900 border-l-transparent"></div>
               Processing custody ledger mutation...
             </div>
           )}
@@ -254,21 +256,21 @@ export default function FileDetail() {
                 <div className="space-y-6">
                   {/* Executive actions if final stage */}
                   {(file.current_stage_id === 4 || file.current_stage_id === 5) && (
-                    <div className="p-4 bg-govBlue-900/60 rounded-xl border border-govBlue-700/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="p-4 bg-govBlue-100 rounded border border-govBlue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <span className="text-xs font-semibold text-white block">Terminal Decision Panel</span>
-                        <span className="text-[10px] text-govBlue-200 block">Close the file's lifecycle permanently</span>
+                        <span className="text-xs font-serif font-extrabold text-govBlue-900 block">Terminal Resolution</span>
+                        <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider mt-0.5 block">Close the file's lifecycle permanently</span>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleTransition('terminal_approve')}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow transition-colors"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-sla-green hover:bg-opacity-95 text-white text-xs font-bold uppercase tracking-wider rounded border border-sla-green transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                         >
                           <Check className="h-4 w-4" /> Approve File
                         </button>
                         <button
                           onClick={() => handleTransition('terminal_reject')}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg shadow transition-colors"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-sla-red hover:bg-opacity-95 text-white text-xs font-bold uppercase tracking-wider rounded border border-sla-red transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                         >
                           <X className="h-4 w-4" /> Reject File
                         </button>
@@ -278,16 +280,16 @@ export default function FileDetail() {
 
                   {/* Forward Dispatch Selector */}
                   {stageInfo.nextStageId && (
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-semibold text-govBlue-100">Forward Dispatch to next stage</h3>
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-govBlue-900">Forward Dispatch Handoff</h3>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] uppercase text-govBlue-200 block mb-1">Select Next Officer</label>
+                          <label className="text-[9px] font-bold uppercase text-govBlue-700 block mb-1">Select Verified Next Officer</label>
                           <select
                             value={recipientId}
                             onChange={(e) => setRecipientId(e.target.value)}
-                            className="block w-full px-3 py-2 bg-govBlue-900/60 border border-govBlue-700/50 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="block w-full px-3 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 text-sm focus:outline-none"
                           >
                             <option value="">-- Choose Officer --</option>
                             {allowedRecipientsForNext.map(o => (
@@ -296,13 +298,13 @@ export default function FileDetail() {
                           </select>
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase text-govBlue-200 block mb-1">Or enter Custom Recipient User ID</label>
+                          <label className="text-[9px] font-bold uppercase text-govBlue-700 block mb-1">Or enter Custom Recipient ID</label>
                           <input
                             type="number"
                             placeholder="Officer DB User ID"
                             value={customRecipientId}
                             onChange={(e) => setCustomRecipientId(e.target.value)}
-                            className="block w-full px-3 py-2 bg-govBlue-900/60 border border-govBlue-700/50 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="block w-full px-3 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 text-sm focus:outline-none"
                           />
                         </div>
                       </div>
@@ -310,7 +312,7 @@ export default function FileDetail() {
                       <button
                         onClick={() => handleTransition('dispatch', stageInfo.nextStageId)}
                         disabled={!recipientId && !customRecipientId}
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2.5 bg-govBlue-900 hover:bg-govBlue-850 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider rounded border border-govBlue-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                       >
                         <Send className="h-3.5 w-3.5" /> Dispatch Handoff
                       </button>
@@ -319,16 +321,16 @@ export default function FileDetail() {
 
                   {/* Send Back Dispatch Selector */}
                   {stageInfo.prevStageId && (
-                    <div className="pt-4 border-t border-govBlue-700/40 space-y-3">
-                      <h3 className="text-xs font-semibold text-govBlue-100">Send Back (Return File)</h3>
+                    <div className="pt-5 border-t border-dashed border-govBlue-200 space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-govBlue-900">Return File (Send Back)</h3>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] uppercase text-govBlue-200 block mb-1">Select Previous Officer</label>
+                          <label className="text-[9px] font-bold uppercase text-govBlue-700 block mb-1">Select Previous Officer</label>
                           <select
                             value={recipientId}
                             onChange={(e) => setRecipientId(e.target.value)}
-                            className="block w-full px-3 py-2 bg-govBlue-900/60 border border-govBlue-700/50 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="block w-full px-3 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 text-sm focus:outline-none"
                           >
                             <option value="">-- Choose Officer --</option>
                             {allowedRecipientsForPrev.map(o => (
@@ -341,7 +343,7 @@ export default function FileDetail() {
                       <button
                         onClick={() => handleTransition('dispatch', stageInfo.prevStageId)}
                         disabled={!recipientId && !customRecipientId}
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-govBlue-800 hover:bg-govBlue-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2.5 bg-white hover:bg-govBlue-100 text-govBlue-900 disabled:opacity-50 text-xs font-bold uppercase tracking-wider rounded border border-govBlue-200 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                       >
                         <Send className="h-3.5 w-3.5" /> Send Back Handoff
                       </button>
@@ -352,16 +354,16 @@ export default function FileDetail() {
 
               {/* Scenario 2: User is the pending recipient -> Must claim / confirm pickup */}
               {isPendingHolder && (
-                <div className="p-5 bg-blue-500/5 rounded-xl border border-blue-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 bg-govBlue-100 rounded border border-govBlue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-sm font-bold text-white">Pending Custody Handoff</h3>
-                    <p className="text-xs text-govBlue-200 mt-0.5">
-                      Confirm physical receipt of this file to proceed.
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-govBlue-900">Confirm Physical Custody</h3>
+                    <p className="text-xs text-govBlue-700 mt-1 font-medium">
+                      Please verify physical receipt of the paper file folder before updating the digital registry.
                     </p>
                   </div>
                   <button
                     onClick={() => handleTransition('receive', file.current_stage_id)}
-                    className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-900/30 transition-colors"
+                    className="flex items-center gap-1.5 px-5 py-2.5 bg-sla-green hover:bg-opacity-95 text-white text-xs font-bold uppercase tracking-wider rounded border border-sla-green transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                   >
                     <Check className="h-4 w-4" /> Confirm Handoff Pickup
                   </button>
@@ -370,9 +372,9 @@ export default function FileDetail() {
 
               {/* Scenario 3: Neither holder nor pending recipient */}
               {!isCurrentHolder && !isPendingHolder && (
-                <div className="p-4 bg-govBlue-900/50 rounded-xl border border-govBlue-700/40 text-center">
-                  <p className="text-xs text-govBlue-200">
-                    You do not currently hold this file. Mutations can only be dispatched by the current holder ({file.current_holder_id}), or received by the pending recipient.
+                <div className="p-4 bg-govBlue-100 border border-govBlue-200 rounded text-center">
+                  <p className="text-xs text-govBlue-700 font-medium">
+                    Ledger View: You do not currently hold this dossier. Modifications can only be dispatched by the active folder custodian ({file.current_holder_id}) or received by the pending recipient.
                   </p>
                 </div>
               )}
@@ -382,24 +384,24 @@ export default function FileDetail() {
       )}
 
       {/* Movement Timeline */}
-      <div className="glass rounded-2xl p-6 border border-govBlue-700/50">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2">
-          <Calendar className="h-4.5 w-4.5 text-blue-400" />
+      <div className="dossier-card rounded-lg p-6">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-govBlue-900 mb-6 flex items-center gap-2">
+          <Calendar className="h-4.5 w-4.5 text-govBlue-700" />
           Custody Audit Ledger Log
         </h2>
 
         {history.length === 0 ? (
-          <p className="text-sm text-govBlue-200 py-4 text-center">No moves logged for this file yet.</p>
+          <p className="text-xs text-govBlue-750 font-bold uppercase tracking-wider py-4 text-center">No transactions logged for this file.</p>
         ) : (
-          <div ref={timelineRef} className="space-y-6 relative before:absolute before:inset-y-1 before:left-3 before:w-0.5 before:bg-govBlue-700/40">
+          <div ref={timelineRef} className="space-y-6 relative before:absolute before:inset-y-1 before:left-3 before:w-px before:border-l before:border-dashed before:border-govBlue-200">
             {history.map((log, index) => (
               <div key={index} className="flex gap-4 items-start relative">
                 <div className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center border ${
                   log.transition_type === 'receive'
-                    ? 'bg-blue-600 border-blue-500 text-white'
+                    ? 'bg-govBlue-900 border-govBlue-900 text-white'
                     : log.transition_type === 'dispatch'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    ? 'bg-white border-govBlue-500 text-govBlue-900'
+                    : 'bg-sla-red/10 border-sla-red/30 text-sla-red'
                 }`}>
                   {log.transition_type === 'receive' ? (
                     <Check className="h-3 w-3" />
@@ -410,28 +412,28 @@ export default function FileDetail() {
                   )}
                 </div>
 
-                <div className="flex-1 bg-govBlue-900/40 border border-govBlue-700/30 p-4 rounded-xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs font-bold text-white">
+                <div className="flex-1 bg-white border border-govBlue-200 p-4 rounded shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-dashed border-govBlue-100 pb-2 mb-2">
+                    <span className="text-xs font-serif font-extrabold text-govBlue-900">
                       {log.transition_type === 'receive' 
-                        ? `Received at stage: ${log.to_stage}` 
+                        ? `Acknowledged Custody: ${log.to_stage}` 
                         : log.transition_type === 'dispatch'
-                        ? `Dispatched to stage: ${log.to_stage || 'N/A'}`
-                        : `Decision: ${log.transition_type}`}
+                        ? `Dispatched to: ${log.to_stage || 'N/A'}`
+                        : `Executive Action: ${log.transition_type?.replace('_', ' ')}`}
                     </span>
-                    <span className="text-[10px] text-govBlue-200">{new Date(log.scanned_at).toLocaleString()}</span>
+                    <span className="text-[10px] text-govBlue-700 font-stamp">{new Date(log.scanned_at).toLocaleString()}</span>
                   </div>
 
-                  <p className="text-xs text-govBlue-200 mt-1">
-                    Handled by: <span className="font-semibold text-white">{log.handled_by}</span>
+                  <p className="text-xs text-govBlue-750 font-medium">
+                    Handled By Custodian: <span className="font-serif font-bold text-govBlue-900">{log.handled_by}</span>
                   </p>
 
-                  <div className="flex gap-4 mt-2 text-[10px] text-govBlue-200">
+                  <div className="flex gap-4 mt-2 text-[10px] text-govBlue-700 font-stamp uppercase">
                     {log.time_at_previous_stage_hours !== null && (
-                      <span>Time spent at previous: {Number(log.time_at_previous_stage_hours).toFixed(1)} hrs</span>
+                      <span>Desk Time: {Number(log.time_at_previous_stage_hours).toFixed(1)} hrs</span>
                     )}
                     {log.transit_hours !== null && (
-                      <span className="text-amber-400 font-medium">In Transit gap: {Number(log.transit_hours).toFixed(1)} hrs</span>
+                      <span className="text-sla-amber font-bold">Transit Time: {Number(log.transit_hours).toFixed(1)} hrs</span>
                     )}
                   </div>
                 </div>

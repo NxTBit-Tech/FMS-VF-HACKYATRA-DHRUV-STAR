@@ -47,32 +47,37 @@ export default function CitizenStatus() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'approved': return 'text-emerald-450 bg-emerald-500/10 border-emerald-500/20';
-      case 'rejected': return 'text-red-400 bg-red-500/10 border-red-500/20';
-      default: return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+      case 'approved': return 'stamp-badge stamp-green text-xs';
+      case 'rejected': return 'stamp-badge stamp-red text-xs';
+      default: return 'stamp-badge stamp-blue text-xs';
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#030f26] flex flex-col justify-between py-12 px-4 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-govBlue-50 flex flex-col justify-between py-12 px-4 relative overflow-hidden">
+      {/* Background shadow outlines */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-govBlue-200 rounded-full opacity-35 pointer-events-none"></div>
 
       <div className="w-full max-w-xl mx-auto flex-1 flex flex-col justify-center relative z-10">
         <div className="text-center mb-10">
-          <div className="h-14 w-14 bg-blue-600/15 border border-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-400">
+          <div className="h-14 w-14 bg-govBlue-100 border border-govBlue-200 rounded-lg flex items-center justify-center mx-auto mb-4 text-govBlue-900 shadow-sm">
             <FileText className="h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">GVMC File Tracker</h1>
-          <p className="text-sm text-govBlue-200 mt-2">
-            Public Status Portal — Town Planning & Building Approvals
+          <h1 className="text-3xl font-serif font-extrabold text-govBlue-900 tracking-tight">GVMC File Tracker</h1>
+          <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-2">
+            Public Tracking Registry — Town Planning & approvals
           </p>
         </div>
 
         {/* Search Box */}
-        <form onSubmit={handleSearch} className="glass p-6 rounded-2xl border border-govBlue-700/50 shadow-2xl mb-8">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-govBlue-100 mb-3">
-            Enter Reference Number
+        <form onSubmit={handleSearch} className="dossier-card p-6 rounded-lg shadow-sm mb-8 relative">
+          {/* File Tab signature element */}
+          <div className="file-folder-tab font-stamp">
+            REGISTRY SEARCH
+          </div>
+
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-3 mt-2">
+            Enter File Reference Number
           </label>
           <div className="relative">
             <input
@@ -81,12 +86,12 @@ export default function CitizenStatus() {
               value={refNumber}
               onChange={(e) => setRefNumber(e.target.value)}
               placeholder="e.g. TP-20260801-4921"
-              className="block w-full pl-4 pr-12 py-3.5 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-white placeholder-govBlue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm font-semibold tracking-wide"
+              className="block w-full pl-4 pr-12 py-3.5 bg-white border border-govBlue-500 rounded text-govBlue-900 placeholder-govBlue-500 focus:outline-none text-sm font-stamp font-bold tracking-wide"
             />
             <button
               type="submit"
               disabled={loading}
-              className="absolute inset-y-1.5 right-1.5 px-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+              className="absolute inset-y-1.5 right-1.5 px-3.5 bg-govBlue-900 hover:bg-govBlue-850 text-white rounded transition-colors flex items-center justify-center disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-white border-r-transparent border-b-white border-l-transparent"></div>
@@ -98,44 +103,51 @@ export default function CitizenStatus() {
         </form>
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl text-sm flex gap-2.5 max-w-md mx-auto">
-            <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+          <div className="p-4 bg-sla-red/5 border border-sla-red/30 text-sla-red rounded text-xs font-semibold flex gap-2.5 max-w-md mx-auto mb-8">
+            <ShieldAlert className="h-5 w-5 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Results Block */}
         {statusData && (
-          <div ref={resultRef} className="glass rounded-2xl border border-govBlue-700/50 p-6 shadow-2xl space-y-6 max-w-md mx-auto w-full">
-            <div className="border-b border-govBlue-700/40 pb-4">
-              <span className="text-[10px] text-govBlue-200 uppercase tracking-wider font-semibold">Reference Number</span>
-              <h2 className="text-base font-extrabold text-white">{statusData.reference_number}</h2>
+          <div ref={resultRef} className="dossier-card rounded-lg p-6 shadow-md max-w-md mx-auto w-full relative overflow-hidden">
+            {/* File Tab signature element */}
+            <div className="file-folder-tab font-stamp">
+              REF: {statusData.reference_number}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="border-b border-dashed border-govBlue-200 pb-4 mt-2">
+              <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider">File Reference</span>
+              <h2 className="text-base font-stamp font-bold text-govBlue-900 mt-0.5">{statusData.reference_number}</h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6 py-4">
               <div>
-                <span className="text-[10px] text-govBlue-200 uppercase tracking-wider block">Current Stage</span>
-                <span className="font-bold text-white text-sm block mt-1">{statusData.stage_name}</span>
+                <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider block">Current Stage</span>
+                <span className="font-serif font-extrabold text-govBlue-900 text-sm block mt-1">{statusData.stage_name}</span>
               </div>
 
               <div>
-                <span className="text-[10px] text-govBlue-200 uppercase tracking-wider block">Resolution Status</span>
-                <span className={`inline-block px-2.5 py-0.5 mt-1 border text-xs font-bold uppercase rounded ${getStatusColor(statusData.status)}`}>
-                  {statusData.status}
-                </span>
+                <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider block">Resolution Status</span>
+                <div className="mt-1">
+                  <span className={getStatusColor(statusData.status)}>
+                    {statusData.status}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-govBlue-700/40 flex items-center gap-2 text-xs text-govBlue-200">
-              <Clock className="h-4 w-4 text-govBlue-500" />
-              <span>Last stage entry updated: {new Date(statusData.stage_entered_at).toLocaleString()}</span>
+            <div className="pt-4 border-t border-dashed border-govBlue-200 flex items-center gap-2 text-xs text-govBlue-700 font-stamp uppercase">
+              <Clock className="h-4 w-4 text-govBlue-500 shrink-0" />
+              <span>Updated: {new Date(statusData.stage_entered_at).toLocaleString()}</span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="text-center pt-8 text-xs text-govBlue-200">
-        <a href="/login" className="hover:text-white transition-colors">
+      <div className="text-center pt-8 text-xs font-bold uppercase tracking-wider text-govBlue-700">
+        <a href="/login" className="hover:text-govBlue-900 underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
           Officer Portal Authentication &rarr;
         </a>
       </div>

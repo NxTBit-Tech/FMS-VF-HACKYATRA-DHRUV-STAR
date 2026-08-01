@@ -26,9 +26,9 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#030f26] text-govBlue-100 flex flex-col">
+    <div className="min-h-screen bg-govBlue-50 text-govBlue-900 flex flex-col">
       <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto pb-12 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>

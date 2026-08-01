@@ -70,64 +70,63 @@ export default function Scan() {
   return (
     <div className="max-w-md mx-auto px-4 py-8">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Camera Handoff Scan</h1>
-        <p className="text-sm text-govBlue-200 mt-1">Scan a file's QR or Code128 barcode to verify custody state</p>
+        <h1 className="text-2xl font-serif font-extrabold text-govBlue-900 tracking-tight">Camera Handoff Scan</h1>
+        <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-1">Scan QR or Barcode to verify custody status</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl text-sm flex gap-2">
-          <AlertTriangle className="h-5 w-5 text-red-400 shrink-0" />
+        <div className="mb-6 p-4 bg-sla-red/5 border border-sla-red/30 text-sla-red rounded text-xs font-semibold flex gap-2">
+          <AlertTriangle className="h-4.5 w-4.5 shrink-0" />
           <div>
-            <p className="font-semibold">Scan Error</p>
-            <p className="text-xs text-red-300 mt-0.5">{error}</p>
+            <p className="font-bold uppercase tracking-wider text-[10px]">Verification Failure</p>
+            <p className="mt-0.5">{error}</p>
           </div>
         </div>
       )}
 
-      {/* QR Code Scanner */}
+      {/* QR Code Scanner Container */}
       {cameraActive && !loading && (
-        <div className="relative rounded-2xl overflow-hidden glass border border-govBlue-700/50 mb-6 aspect-square shadow-2xl">
+        <div className="relative rounded-lg overflow-hidden border border-govBlue-200 bg-white mb-6 aspect-square shadow-sm">
           <Scanner
             onResult={(text) => handleScanSuccess(text)}
             onError={(err) => {
               console.log('Scanner error:', err);
-              // Fail silently to manual input if webcam fails
             }}
           />
-          <div className="absolute inset-0 border-2 border-dashed border-blue-500/40 pointer-events-none rounded-2xl m-4 flex items-center justify-center">
-            <div className="w-10 h-10 border-t-4 border-l-4 border-blue-400 absolute top-0 left-0"></div>
-            <div className="w-10 h-10 border-t-4 border-r-4 border-blue-400 absolute top-0 right-0"></div>
-            <div className="w-10 h-10 border-b-4 border-l-4 border-blue-400 absolute bottom-0 left-0"></div>
-            <div className="w-10 h-10 border-b-4 border-r-4 border-blue-400 absolute bottom-0 right-0"></div>
-            <span className="text-xs font-semibold uppercase text-blue-300 bg-[#030f26]/80 px-3 py-1 rounded-full tracking-wider border border-blue-500/20">
-              Align Code in Box
+          <div className="absolute inset-0 border-2 border-dashed border-govBlue-500/40 pointer-events-none rounded-lg m-4 flex items-center justify-center">
+            <div className="w-10 h-10 border-t-4 border-l-4 border-sla-red absolute top-0 left-0"></div>
+            <div className="w-10 h-10 border-t-4 border-r-4 border-sla-red absolute top-0 right-0"></div>
+            <div className="w-10 h-10 border-b-4 border-l-4 border-sla-red absolute bottom-0 left-0"></div>
+            <div className="w-10 h-10 border-b-4 border-r-4 border-sla-red absolute bottom-0 right-0"></div>
+            <span className="stamp-badge stamp-red text-[10px] bg-white/95 px-3 py-1 font-stamp tracking-wider select-none shadow">
+              ALIGN CODE IN BRACKETS
             </span>
           </div>
         </div>
       )}
 
       {loading && (
-        <div className="glass rounded-2xl py-16 text-center border border-govBlue-700/30 mb-6 flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent"></div>
-          <span className="text-sm text-govBlue-200">Resolving file identity details...</span>
+        <div className="dossier-card rounded-lg py-16 text-center mb-6 flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-govBlue-900 border-r-transparent border-b-govBlue-900 border-l-transparent"></div>
+          <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700">Resolving file identity details...</span>
         </div>
       )}
 
       {/* Manual Input Fallback */}
       {!scanData && !loading && (
-        <form onSubmit={handleManualSubmit} className="glass p-5 rounded-2xl border border-govBlue-700/30 mb-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-govBlue-100 mb-3">Manual Entry Reference</h2>
+        <form onSubmit={handleManualSubmit} className="dossier-card p-5 rounded-lg mb-6">
+          <h2 className="text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-3">Manual Registry Entry</h2>
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="e.g. TP-20260801-4921"
               value={manualRef}
               onChange={(e) => setManualRef(e.target.value)}
-              className="flex-1 px-3.5 py-2.5 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-white placeholder-govBlue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm"
+              className="flex-1 px-3.5 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 placeholder-govBlue-500 focus:outline-none text-sm font-medium"
             />
             <button
               type="submit"
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-colors shadow shadow-blue-900/20"
+              className="px-4 py-2 bg-govBlue-900 hover:bg-govBlue-850 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 transition-colors shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
             >
               Verify
             </button>
@@ -137,24 +136,27 @@ export default function Scan() {
 
       {/* Resolved Scan Result */}
       {scanData && (
-        <div ref={resultCardRef} className="glass rounded-2xl border border-govBlue-700/50 p-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none"></div>
+        <div ref={resultCardRef} className="dossier-card rounded-lg p-6 shadow-md relative overflow-hidden mt-6">
+          {/* File Tab signature element */}
+          <div className="file-folder-tab font-stamp">
+            REF: {scanData.referenceNumber}
+          </div>
 
-          <div className="flex items-start gap-4 pb-5 border-b border-govBlue-700/40">
-            <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-400">
+          <div className="flex items-start gap-4 pb-5 border-b border-dashed border-govBlue-200 mt-2">
+            <div className="p-3 bg-govBlue-100 rounded border border-govBlue-200 text-govBlue-900">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <span className="text-[10px] text-govBlue-200 font-semibold uppercase tracking-wider">File Reference</span>
-              <h2 className="text-lg font-extrabold text-white leading-tight">{scanData.referenceNumber}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs px-2 py-0.5 bg-govBlue-900 text-govBlue-100 rounded border border-govBlue-700">
-                  {scanData.currentStage.name}
+              <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider block">Verified File Record</span>
+              <h2 className="text-base font-serif font-extrabold text-govBlue-900 leading-tight mt-0.5">{scanData.referenceNumber}</h2>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-govBlue-100 text-govBlue-900 rounded border border-govBlue-200">
+                  Stage: {scanData.currentStage.name}
                 </span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                <span className={`stamp-badge text-[9px] ${
                   scanData.slaStatus === 'overdue' 
-                    ? 'bg-red-500/10 border border-red-500/20 text-red-400' 
-                    : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                    ? 'stamp-red' 
+                    : 'stamp-green'
                 }`}>
                   {scanData.slaStatus}
                 </span>
@@ -162,22 +164,20 @@ export default function Scan() {
             </div>
           </div>
 
-          <div className="py-5 space-y-4 text-sm border-b border-govBlue-700/40">
+          <div className="py-5 space-y-4 text-sm border-b border-dashed border-govBlue-200">
             <div>
-              <span className="text-xs text-govBlue-200 block mb-1">Current Custody Holder</span>
-              <div className="flex items-center gap-2 text-white">
-                <UserCheck className="h-4 w-4 text-blue-400" />
-                <span className="font-semibold">{scanData.currentHolder?.name || 'None'}</span>
-                <span className="text-xs text-govBlue-200">({scanData.currentHolder?.role})</span>
+              <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block mb-1">Current Custody Holder</span>
+              <div className="flex items-center gap-2 text-govBlue-900">
+                <span className="font-serif font-extrabold">{scanData.currentHolder?.name || 'None'}</span>
+                <span className="text-xs text-govBlue-700">({scanData.currentHolder?.role?.replace('_', ' ')})</span>
               </div>
             </div>
 
             {scanData.pendingHandoff && (
               <div>
-                <span className="text-xs text-govBlue-200 block mb-1">Pending Recipient (In Transit)</span>
-                <div className="flex items-center gap-2 text-amber-400 bg-amber-500/5 p-2 rounded-lg border border-amber-500/20">
-                  <ArrowRight className="h-4 w-4" />
-                  <span className="font-semibold">{scanData.pendingHandoff.pendingHolderName}</span>
+                <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block mb-1">Pending Recipient (In Transit)</span>
+                <div className="flex items-center gap-2 text-sla-amber bg-sla-amber/5 px-3 py-2 rounded border border-sla-amber/35">
+                  <span className="font-serif font-extrabold">{scanData.pendingHandoff.pendingHolderName}</span>
                 </div>
               </div>
             )}
@@ -187,22 +187,20 @@ export default function Scan() {
           <div className="pt-6">
             {canAction() ? (
               <div className="space-y-3">
-                <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 mb-2">
-                  <Shield className="h-3.5 w-3.5" />
-                  You have verified rights to perform actions on this file.
+                <p className="text-[10px] text-sla-green font-bold uppercase tracking-wider mb-2">
+                  ✓ Verification Approved: Access rights granted.
                 </p>
                 <button
                   onClick={() => navigate(`/files/${scanData.fileId}`)}
-                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 text-sm flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-govBlue-900 hover:bg-govBlue-850 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
                 >
-                  <Send className="h-4 w-4" />
-                  Proceed to Handoff / Actions
+                  Proceed to Handoff / Action Panel
                 </button>
               </div>
             ) : (
-              <div className="p-4 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-center">
-                <p className="text-xs text-govBlue-200">
-                  You do not currently hold this file. All transitions are locked to the verified holder.
+              <div className="p-4 bg-govBlue-100 border border-govBlue-200 rounded text-center">
+                <p className="text-xs text-govBlue-700 font-medium">
+                  Ledger Warning: Access is locked. Custody actions can only be processed by the active holder or pending recipient.
                 </p>
               </div>
             )}
@@ -213,7 +211,7 @@ export default function Scan() {
                 setCameraActive(true);
                 setManualRef('');
               }}
-              className="w-full mt-3 py-2.5 px-4 text-xs font-semibold text-govBlue-200 hover:text-white transition-colors"
+              className="w-full mt-4 py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-govBlue-700 hover:text-govBlue-900 transition-colors"
             >
               Scan Another Code
             </button>

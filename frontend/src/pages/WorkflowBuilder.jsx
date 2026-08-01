@@ -39,18 +39,18 @@ export default function WorkflowBuilder() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Workflow Setup</h1>
-        <p className="text-sm text-govBlue-200 mt-1">
-          Customize stage orders, owning roles, and SLA timeframes for departmental workflows.
+        <h1 className="text-3xl font-serif font-extrabold text-govBlue-900 tracking-tight">Workflow Setup</h1>
+        <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-1">
+          Customize stage orders, owning roles, and SLA timeframes for departmental routing slip workflows.
         </p>
       </div>
 
       {/* Connection Warning Banner */}
-      <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-xl text-sm flex gap-3 items-start max-w-2xl mx-auto shadow-lg">
-        <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+      <div className="mb-8 p-4 bg-sla-amber/5 border border-sla-amber/30 text-govBlue-900 rounded flex gap-3 items-start max-w-2xl mx-auto shadow-sm">
+        <AlertCircle className="h-5 w-5 text-sla-amber shrink-0 mt-0.5" />
         <div>
-          <p className="font-bold">Feature Coming Soon (Not Connected)</p>
-          <p className="text-xs text-amber-300/90 mt-0.5">
+          <p className="font-bold uppercase tracking-wider text-[10px]">Feature Pending Registry Link</p>
+          <p className="text-xs text-govBlue-700 mt-1 font-medium">
             The JSON-to-rows schema materializer engine is not yet activated on the backend server.
             You can design custom workflows in this sandbox, but changes cannot be saved or applied yet.
           </p>
@@ -59,15 +59,15 @@ export default function WorkflowBuilder() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Editor Form */}
-        <div className="glass p-6 rounded-2xl border border-govBlue-700/50 space-y-6">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Plus className="h-5 w-5 text-blue-400" />
+        <div className="dossier-card p-6 rounded-lg space-y-6">
+          <h2 className="text-sm font-serif font-extrabold text-govBlue-900 flex items-center gap-2">
+            <Plus className="h-5 w-5 text-govBlue-700" />
             Append New Stage
           </h2>
 
           <form onSubmit={addStage} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-govBlue-100 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-1.5">
                 Stage Name
               </label>
               <input
@@ -75,19 +75,19 @@ export default function WorkflowBuilder() {
                 placeholder="e.g. Structural Audit"
                 value={newStageName}
                 onChange={(e) => setNewStageName(e.target.value)}
-                className="block w-full px-3 py-2.5 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-white placeholder-govBlue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm"
+                className="block w-full px-3 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 placeholder-govBlue-500 focus:outline-none text-sm font-medium"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-govBlue-100 mb-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-1.5">
                   Owning Role
                 </label>
                 <select
                   value={newStageRole}
                   onChange={(e) => setNewStageRole(e.target.value)}
-                  className="block w-full px-3 py-2.5 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                  className="block w-full px-3 py-2.5 bg-white border border-govBlue-500 rounded text-govBlue-900 text-sm focus:outline-none"
                 >
                   <option value="revenue_inspector">Revenue Inspector</option>
                   <option value="town_planning_officer">Town Planning Officer</option>
@@ -98,21 +98,21 @@ export default function WorkflowBuilder() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-govBlue-100 mb-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-govBlue-700 mb-1.5">
                   SLA (Hours)
                 </label>
                 <input
                   type="number"
                   value={newStageSla}
                   onChange={(e) => setNewStageSla(e.target.value)}
-                  className="block w-full px-3 py-2.5 bg-govBlue-900/60 border border-govBlue-700/50 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                  className="block w-full px-3 py-2 bg-white border border-govBlue-500 rounded text-govBlue-900 text-sm focus:outline-none font-medium"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition-colors shadow shadow-blue-900/20"
+              className="w-full py-2.5 px-4 bg-govBlue-900 hover:bg-govBlue-850 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 transition-colors shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
             >
               Add Stage to Plan
             </button>
@@ -120,27 +120,32 @@ export default function WorkflowBuilder() {
         </div>
 
         {/* Live Sequence Outline */}
-        <div className="glass p-6 rounded-2xl border border-govBlue-700/50 flex flex-col justify-between">
-          <div>
-            <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-blue-400" />
+        <div className="dossier-card p-6 rounded-lg flex flex-col justify-between relative mt-6 md:mt-0">
+          {/* File Tab signature element */}
+          <div className="file-folder-tab font-stamp">
+            ROUTING SEQUENCE
+          </div>
+
+          <div className="mt-2">
+            <h2 className="text-sm font-serif font-extrabold text-govBlue-900 mb-6 flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-govBlue-700" />
               Workflow Sequence Preview
             </h2>
 
             <div className="space-y-4">
               {stages.map((stage, index) => (
-                <div key={stage.id} className="flex items-center gap-3 bg-govBlue-900/40 p-3 rounded-xl border border-govBlue-700/30 group">
-                  <div className="h-6 w-6 rounded-full bg-blue-600/10 text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-500/20">
+                <div key={stage.id} className="flex items-center gap-3 bg-white p-3 rounded border border-govBlue-200 group shadow-sm">
+                  <div className="h-6 w-6 rounded-full bg-govBlue-100 text-govBlue-900 font-bold text-xs flex items-center justify-center border border-govBlue-200">
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <span className="text-sm font-semibold text-white block leading-tight">{stage.name}</span>
-                    <span className="text-[10px] text-govBlue-200 uppercase tracking-wider">{stage.role} • {stage.sla}h SLA</span>
+                    <span className="text-sm font-serif font-bold text-govBlue-900 block leading-tight">{stage.name}</span>
+                    <span className="text-[10px] text-govBlue-700 font-bold uppercase tracking-wider block mt-0.5">{stage.role?.replace('_', ' ')} • {stage.sla}h SLA</span>
                   </div>
                   {stages.length > 1 && (
                     <button
                       onClick={() => removeStage(stage.id)}
-                      className="p-1.5 text-govBlue-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1.5 text-govBlue-500 hover:text-sla-red hover:bg-sla-red/5 rounded border border-transparent hover:border-sla-red/20 transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -150,10 +155,10 @@ export default function WorkflowBuilder() {
             </div>
           </div>
 
-          <div className="pt-6 mt-6 border-t border-govBlue-700/40">
+          <div className="pt-6 mt-6 border-t border-dashed border-govBlue-200">
             <button
               disabled
-              className="w-full py-3 px-4 bg-govBlue-800 text-govBlue-500 font-semibold rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2 border border-govBlue-700/50"
+              className="w-full py-3 px-4 bg-govBlue-100 text-govBlue-550 font-bold uppercase tracking-wider text-xs rounded border border-govBlue-200 cursor-not-allowed"
             >
               Save Workflow Template (Disabled)
             </button>

@@ -49,31 +49,31 @@ export default function Dashboard() {
     if (hoursNum > slaNum) {
       return {
         label: 'Overdue',
-        classes: 'bg-red-500/10 border border-red-500/30 text-red-400',
+        classes: 'stamp-badge stamp-red text-[10px]',
         icon: AlertTriangle
       };
     } else if (hoursNum > slaNum * 0.75) {
       return {
         label: 'Approaching SLA',
-        classes: 'bg-amber-500/10 border border-amber-500/30 text-amber-400',
+        classes: 'stamp-badge stamp-amber text-[10px]',
         icon: Clock
       };
     }
     return {
       label: 'On Time',
-      classes: 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400',
+      classes: 'stamp-badge stamp-green text-[10px]',
       icon: CheckCircle
     };
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Overview header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Officer Dashboard</h1>
-          <p className="text-sm text-govBlue-200 mt-1">
-            Review files currently awaiting actions under your official custody.
+          <h1 className="text-3xl font-serif font-extrabold text-govBlue-900 tracking-tight">Officer Dashboard</h1>
+          <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-1">
+            Official Custody Queue — GVMC Approvals Ledger
           </p>
         </div>
 
@@ -81,98 +81,96 @@ export default function Dashboard() {
           <button
             onClick={fetchFiles}
             disabled={loading}
-            className="p-3 bg-govBlue-800/40 hover:bg-govBlue-700/40 text-govBlue-100 rounded-xl border border-govBlue-700/50 transition-colors"
-            title="Refresh List"
+            className="p-3 bg-white hover:bg-govBlue-150 text-govBlue-900 rounded border border-govBlue-200 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
+            title="Refresh Ledger List"
           >
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <Link
             to="/scan"
-            className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-900/30 transition-all text-sm"
+            className="flex items-center gap-2 px-5 py-3 bg-govBlue-900 hover:bg-govBlue-850 active:bg-govBlue-950 text-white font-bold uppercase tracking-wider text-xs rounded border border-govBlue-900 shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
           >
-            <QrCode className="h-4 w-4" />
-            Quick Scan
+            <QrCode className="h-4 w-4 shrink-0" />
+            Quick Scan Registry
           </Link>
         </div>
       </div>
 
       {/* Grid metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="glass p-6 rounded-2xl flex items-center justify-between">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="dossier-card p-6 rounded-lg flex items-center justify-between">
           <div>
-            <span className="text-xs text-govBlue-200 uppercase font-semibold tracking-wider">Held Files</span>
-            <span className="text-3xl font-bold text-white block mt-1">{files.length}</span>
+            <span className="text-[10px] text-govBlue-700 uppercase font-bold tracking-wider">Custody Files Held</span>
+            <span className="text-3xl font-serif font-extrabold text-govBlue-900 block mt-1">{files.length}</span>
           </div>
-          <div className="p-3 bg-blue-500/10 rounded-xl">
-            <FileText className="h-6 w-6 text-blue-400" />
+          <div className="p-3 bg-govBlue-200 rounded border border-govBlue-500 text-govBlue-900">
+            <FileText className="h-6 w-6" />
           </div>
         </div>
 
-        <div className="glass p-6 rounded-2xl flex items-center justify-between">
+        <div className="dossier-card p-6 rounded-lg flex items-center justify-between border-l-4 border-l-sla-red">
           <div>
-            <span className="text-xs text-govBlue-200 uppercase font-semibold tracking-wider">Overdue Files</span>
-            <span className="text-3xl font-bold text-red-400 block mt-1">
+            <span className="text-[10px] text-govBlue-700 uppercase font-bold tracking-wider">Overdue SLA Actions</span>
+            <span className="text-3xl font-serif font-extrabold text-sla-red block mt-1">
               {files.filter(f => (Number(f.hours_at_stage) > Number(f.sla_hours))).length}
             </span>
           </div>
-          <div className="p-3 bg-red-500/10 rounded-xl">
-            <AlertTriangle className="h-6 w-6 text-red-400" />
+          <div className="p-3 bg-sla-red/5 rounded border border-sla-red/30 text-sla-red">
+            <AlertTriangle className="h-6 w-6" />
           </div>
         </div>
 
-        <div className="glass p-6 rounded-2xl flex items-center justify-between">
+        <div className="dossier-card p-6 rounded-lg flex items-center justify-between border-l-4 border-l-sla-green">
           <div>
-            <span className="text-xs text-govBlue-200 uppercase font-semibold tracking-wider">On-Time Files</span>
-            <span className="text-3xl font-bold text-emerald-400 block mt-1">
+            <span className="text-[10px] text-govBlue-700 uppercase font-bold tracking-wider">On-Time Process Progress</span>
+            <span className="text-3xl font-serif font-extrabold text-sla-green block mt-1">
               {files.filter(f => (Number(f.hours_at_stage) <= Number(f.sla_hours))).length}
             </span>
           </div>
-          <div className="p-3 bg-emerald-500/10 rounded-xl">
-            <CheckCircle className="h-6 w-6 text-emerald-400" />
+          <div className="p-3 bg-sla-green/5 rounded border border-sla-green/30 text-sla-green">
+            <CheckCircle className="h-6 w-6" />
           </div>
         </div>
       </div>
 
-      {/* Main content table */}
-      <div className="glass rounded-2xl overflow-hidden shadow-xl border border-govBlue-700/30">
-        <div className="px-6 py-4 border-b border-govBlue-700/40 bg-govBlue-800/10 flex items-center justify-between">
-          <h2 className="text-base font-bold text-white">Files Pending Your Actions ({files.length})</h2>
+      {/* Main content ledger table */}
+      <div className="dossier-card rounded-lg shadow-sm border border-govBlue-200 mt-8 relative">
+        {/* Case-File Tab signature element */}
+        <div className="file-folder-tab">
+          PENDING CUSTODY RECORD ({files.length})
+        </div>
+
+        <div className="px-6 py-4 border-b border-dashed border-govBlue-200 bg-govBlue-100 flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-govBlue-900">Files Pending Your Review</h2>
         </div>
 
         {error && (
-          <div className="m-6 p-4 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl text-sm">
+          <div className="m-6 p-4 bg-sla-red/5 border border-sla-red/30 text-sla-red rounded text-xs font-semibold">
             {error}
           </div>
         )}
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <RefreshCw className="h-8 w-8 text-blue-500 animate-spin" />
-            <span className="text-sm text-govBlue-200">Loading your pending file registry...</span>
+            <RefreshCw className="h-8 w-8 text-govBlue-900 animate-spin" />
+            <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700">Loading your pending file registry...</span>
           </div>
         ) : files.length === 0 ? (
           <div className="text-center py-20">
-            <CheckCircle className="h-12 w-12 text-emerald-500/40 mx-auto mb-3" />
-            <p className="text-base font-semibold text-white">Clear Desk!</p>
-            <p className="text-sm text-govBlue-200 mt-1">No files are currently pending your approval or handoff.</p>
+            <CheckCircle className="h-12 w-12 text-sla-green/45 mx-auto mb-3" />
+            <p className="text-base font-serif font-extrabold text-govBlue-900">Desk Cleared!</p>
+            <p className="text-xs text-govBlue-700 font-medium mt-1">All files have been successfully audited and dispatched forward.</p>
           </div>
         ) : (
-          <div ref={listRef} className="divide-y divide-govBlue-700/40">
+          <div ref={listRef} className="divide-y divide-dashed divide-govBlue-200 bg-white">
             {files.map((file) => {
               const badge = getSlaBadge(file.hours_at_stage, file.sla_hours);
               const BadgeIcon = badge.icon;
               return (
                 <div 
                   key={file.reference_number} 
-                  className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-govBlue-800/20 transition-all cursor-pointer group"
+                  className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-govBlue-50/50 transition-all cursor-pointer group"
                   onClick={() => {
-                    // Search scan-lookup endpoint first using the ref, or navigate direct.
-                    // The lookup yields the internal DB id which the detail view needs
-                    // Wait, files list has reference_number. Can we look up by ref? Yes, /files/scan/:ref returns the DB ID!
-                    // Let's resolve the reference_number to database ID by calling api scan or just navigate to detail if we have it?
-                    // Wait! The result rows from /dashboard/pending do NOT contain file ID! They contain reference_number, stage_name, stage_entered_at, etc.
-                    // Oh! So to go to detail, we need the file ID. We can lookup using `GET /api/files/scan/:ref` which returns the fileId!
-                    // Let's route them to `/scan-resolve/${file.reference_number}` or do the fetch inline.
                     setLoading(true);
                     api.get(`/files/scan/${file.reference_number}`)
                       .then((res) => {
@@ -185,36 +183,36 @@ export default function Dashboard() {
                   }}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-govBlue-900/80 rounded-xl border border-govBlue-700/50 group-hover:border-blue-500/50 transition-colors">
-                      <FileText className="h-6 w-6 text-govBlue-200" />
+                    <div className="p-3 bg-govBlue-100 rounded border border-govBlue-200 group-hover:border-govBlue-900 transition-colors">
+                      <FileText className="h-6 w-6 text-govBlue-700" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-stamp font-bold text-govBlue-900 group-hover:text-sla-red transition-colors">
                           {file.reference_number}
                         </span>
-                        <span className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-300 rounded-md border border-blue-500/20">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-govBlue-200 text-govBlue-900 rounded border border-govBlue-200">
                           {file.stage_name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 mt-1.5 text-xs text-govBlue-200">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5 text-govBlue-500" />
-                          Held for: {Math.max(0, Number(file.hours_at_stage)).toFixed(1)} hrs
+                      <div className="flex items-center gap-4 mt-2 text-xs text-govBlue-700">
+                        <span className="flex items-center gap-1 font-medium">
+                          <Clock className="h-3.5 w-3.5 text-govBlue-500 shrink-0" />
+                          Held: {Math.max(0, Number(file.hours_at_stage)).toFixed(1)} hrs
                         </span>
-                        <span>
-                          SLA limit: {file.sla_hours} hrs
+                        <span className="font-medium">
+                          Stage SLA: {file.sla_hours} hrs
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${badge.classes}`}>
-                      <BadgeIcon className="h-3.5 w-3.5" />
+                  <div className="flex items-center justify-between sm:justify-end gap-6">
+                    <span className={badge.classes}>
+                      <BadgeIcon className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                       {badge.label}
                     </span>
-                    <ChevronRight className="h-5 w-5 text-govBlue-500 group-hover:text-white transition-colors" />
+                    <ChevronRight className="h-5 w-5 text-govBlue-500 group-hover:text-govBlue-900 transition-colors" />
                   </div>
                 </div>
               );

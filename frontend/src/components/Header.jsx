@@ -32,24 +32,24 @@ export default function Header() {
   navItems.push({ path: '/builder', label: 'Workflow Setup', icon: Briefcase });
 
   return (
-    <header className="glass sticky top-0 z-40 w-full border-b border-govBlue-700/40">
+    <header className="sticky top-0 z-40 w-full bg-govBlue-100 border-b border-govBlue-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-base tracking-wider shadow shadow-blue-500/20">
+          <div className="h-9 w-9 bg-govBlue-900 rounded border border-govBlue-500 flex items-center justify-center font-serif font-bold text-govBlue-50 text-base tracking-wider shadow-inner">
             GV
           </div>
           <div>
-            <Link to="/" className="text-sm font-bold text-white tracking-wide block hover:text-blue-400 transition-colors">
+            <Link to="/" className="text-sm font-serif font-extrabold text-govBlue-900 tracking-wide block hover:text-govBlue-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red">
               GVMC File Management
             </Link>
-            <span className="text-[10px] text-govBlue-200 block uppercase tracking-wider -mt-0.5">
+            <span className="text-[10px] text-govBlue-700 block uppercase tracking-wider -mt-0.5 font-semibold">
               {user.department} Dept
             </span>
           </div>
         </div>
 
         {/* Navigation links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -57,13 +57,13 @@ export default function Header() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded border transition-all ${
                   isActive
-                    ? 'text-white bg-blue-500/10 border border-blue-500/20 shadow-inner'
-                    : 'text-govBlue-200 hover:text-white hover:bg-govBlue-800/40'
+                    ? 'text-govBlue-900 bg-govBlue-200 border-govBlue-500 shadow-sm font-extrabold'
+                    : 'text-govBlue-700 border-transparent hover:text-govBlue-900 hover:bg-govBlue-200/50'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" />
                 {item.label}
               </Link>
             );
@@ -73,19 +73,19 @@ export default function Header() {
         {/* User profile & logout */}
         <div className="flex items-center gap-4">
           <div className="text-right hidden sm:block">
-            <span className="text-xs font-semibold text-white block">
+            <span className="text-xs font-extrabold text-govBlue-900 block font-serif">
               {user.fullName}
             </span>
-            <span className="text-[10px] text-govBlue-200 uppercase tracking-wider block font-medium">
+            <span className="text-[9px] text-govBlue-700 uppercase tracking-wider block font-bold">
               {getRoleDisplayName(user.role)}
             </span>
           </div>
 
-          <div className="h-8 w-px bg-govBlue-700/40 hidden sm:block"></div>
+          <div className="h-8 w-px bg-govBlue-200 hidden sm:block"></div>
 
           <button
             onClick={logout}
-            className="p-2 text-govBlue-200 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+            className="p-2 text-govBlue-700 hover:text-sla-red hover:bg-sla-red/10 rounded border border-transparent hover:border-sla-red/20 transition-all"
             title="Log Out"
           >
             <LogOut className="h-5 w-5" />
@@ -94,7 +94,7 @@ export default function Header() {
       </div>
       
       {/* Mobile navigation bar */}
-      <div className="md:hidden glass-light border-t border-govBlue-700/30 flex items-center justify-around py-2 px-1">
+      <div className="md:hidden bg-govBlue-100 border-t border-govBlue-250 flex items-center justify-around py-2 px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -102,10 +102,10 @@ export default function Header() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center gap-0.5 text-[10px] font-medium py-1 px-2.5 rounded-md transition-all ${
+              className={`flex flex-col items-center gap-0.5 text-[9px] uppercase font-bold py-1 px-2.5 rounded border transition-all ${
                 isActive
-                  ? 'text-blue-400 bg-blue-500/5'
-                  : 'text-govBlue-200'
+                  ? 'text-govBlue-900 bg-govBlue-200 border-govBlue-200'
+                  : 'text-govBlue-700 border-transparent'
               }`}
             >
               <Icon className="h-4 w-4" />

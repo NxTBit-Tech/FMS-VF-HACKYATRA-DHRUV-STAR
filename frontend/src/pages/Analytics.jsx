@@ -82,19 +82,19 @@ export default function Analytics() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight font-serif">Executive Analytics</h1>
-          <p className="text-sm text-govBlue-200 mt-1">
+          <h1 className="text-3xl font-serif font-extrabold text-govBlue-900 tracking-tight">Executive Analytics</h1>
+          <p className="text-xs text-govBlue-700 font-bold uppercase tracking-wider mt-1">
             Commissioner's overview of departmental efficiency, bottlenecks, and handoff integrity.
           </p>
         </div>
         <button
           onClick={fetchAnalytics}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-govBlue-850 hover:bg-govBlue-800 text-govBlue-100 rounded-xl border border-govBlue-700/50 transition-all text-xs font-semibold"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-govBlue-150 text-govBlue-900 rounded border border-govBlue-200 transition-all text-xs font-bold uppercase tracking-wider focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sla-red"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Reload Audit metrics
@@ -102,70 +102,73 @@ export default function Analytics() {
       </div>
 
       {error && (
-        <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl text-sm">
+        <div className="mb-8 p-4 bg-sla-red/5 border border-sla-red/30 text-sla-red rounded text-xs font-semibold">
           {error}
         </div>
       )}
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-32 gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent"></div>
-          <span className="text-sm text-govBlue-200">Aggregating departmental metrics...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-govBlue-900 border-r-transparent border-b-govBlue-900 border-l-transparent"></div>
+          <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700">Aggregating departmental metrics...</span>
         </div>
       )}
 
       {!loading && (
         <div className="space-y-8">
           {/* CRITICAL CORE METRIC: FILES STUCK IN TRANSIT (VISUALLY PROMINENT) */}
-          <div className="glass rounded-2xl border border-red-500/30 bg-gradient-to-r from-red-500/5 to-govBlue-800/10 p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="dossier-card rounded-lg p-6 shadow-sm relative overflow-hidden border-t-4 border-t-sla-red">
+            {/* File Tab signature element */}
+            <div className="file-folder-tab font-stamp">
+              TRANSIT ALERT LOG
+            </div>
 
-            <div className="flex items-start justify-between pb-4 border-b border-govBlue-700/30">
+            <div className="flex items-start justify-between pb-4 border-b border-dashed border-govBlue-200 mt-2">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-red-500/10 rounded-2xl text-red-400 border border-red-500/20 shadow-md">
+                <div className="p-3 bg-sla-red/5 rounded border border-sla-red/30 text-sla-red">
                   <ShieldAlert className="h-7 w-7" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-extrabold text-white leading-tight">
-                    Files Stuck in Transit (Custody Accountability Gate)
+                  <h2 className="text-lg font-serif font-extrabold text-govBlue-900 leading-tight">
+                    Files Stuck in Transit (Custody Accountancy Gap)
                   </h2>
-                  <p className="text-xs text-govBlue-200 mt-0.5">
-                    Critical warning for files dispatched but not yet acknowledged via receiver scan past standard transit SLA.
+                  <p className="text-xs text-govBlue-700 font-medium mt-0.5">
+                    Critical warning for files dispatched but not yet acknowledged via receiver scan.
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <span ref={transitCountRef} className="text-3xl font-extrabold text-red-400 block leading-none">0</span>
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-govBlue-200">overdue transfers</span>
+                <span ref={transitCountRef} className="text-3xl font-serif font-extrabold text-sla-red block leading-none">0</span>
+                <span className="text-[9px] uppercase tracking-wider font-bold text-govBlue-700">stuck transfers</span>
               </div>
             </div>
 
             {inTransit.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-sm text-emerald-400 font-semibold">All handoffs completed on time!</p>
-                <p className="text-xs text-govBlue-200 mt-1">No files are currently stuck in transit between officer desks.</p>
+                <p className="text-xs text-sla-green font-bold uppercase tracking-wider">✓ All handoffs completed successfully on time!</p>
+                <p className="text-xs text-govBlue-700 mt-1">No files are currently stuck in transit between officer desks.</p>
               </div>
             ) : (
-              <div className="divide-y divide-govBlue-700/30 mt-4 max-h-80 overflow-y-auto pr-2">
+              <div className="divide-y divide-dashed divide-govBlue-200 mt-4 max-h-80 overflow-y-auto pr-2 bg-white">
                 {inTransit.map((file) => (
-                  <div key={file.reference_number} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 first:pt-0 last:pb-0">
+                  <div key={file.reference_number} className="py-4 px-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 first:pt-2 last:pb-2">
                     <div className="flex items-center gap-3">
-                      <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+                      <div className="h-2.5 w-2.5 rounded-full bg-sla-red animate-pulse"></div>
                       <div>
-                        <span className="text-xs font-bold text-white block leading-tight">{file.reference_number}</span>
-                        <span className="text-[10px] text-govBlue-200 mt-0.5 block">
-                          Dispatched by: <span className="text-white font-semibold">{file.dispatched_by}</span>
+                        <span className="text-xs font-stamp font-bold text-govBlue-900 block leading-tight">{file.reference_number}</span>
+                        <span className="text-[10px] text-govBlue-700 mt-1 block">
+                          Dispatched by Custodian: <span className="text-govBlue-900 font-bold">{file.dispatched_by}</span>
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                       <div className="text-left sm:text-right">
-                        <span className="text-xs text-red-400 font-semibold block leading-tight">
+                        <span className="text-xs text-sla-red font-bold block leading-tight">
                           {Number(file.hours_in_transit).toFixed(1)} hrs stuck
                         </span>
-                        <span className="text-[9px] text-govBlue-200 block">
-                          Transit SLA Limit: {file.transit_sla_hours} hrs
+                        <span className="text-[9px] font-stamp text-govBlue-700 block mt-0.5">
+                          Limit: {file.transit_sla_hours} hrs
                         </span>
                       </div>
                       <ArrowRight className="h-4 w-4 text-govBlue-500 hidden sm:block" />
@@ -178,30 +181,30 @@ export default function Analytics() {
 
           {/* Overview Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass p-6 rounded-2xl flex items-center justify-between border-l-4 border-l-blue-500 shadow-xl">
+            <div className="dossier-card p-6 rounded-lg flex items-center justify-between border-l-4 border-l-govBlue-900 shadow-sm">
               <div>
-                <span className="text-xs text-govBlue-200 uppercase font-semibold tracking-wider">Average Approval Speed</span>
+                <span className="text-[10px] text-govBlue-700 uppercase font-bold tracking-wider">Average Approval Velocity</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span ref={avgTimeRef} className="text-4xl font-extrabold text-white leading-none">0.0</span>
-                  <span className="text-sm font-semibold text-govBlue-200">hours</span>
+                  <span ref={avgTimeRef} className="text-4xl font-serif font-extrabold text-govBlue-900 leading-none">0.0</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700 ml-1">hours</span>
                 </div>
-                <span className="text-[10px] text-govBlue-200 mt-1 block">Accumulated average from first scan to final approved status</span>
+                <span className="text-[10px] text-govBlue-700 font-medium mt-2 block">Mean duration from initialization to final approval status</span>
               </div>
-              <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20 text-blue-400">
+              <div className="p-3 bg-govBlue-100 rounded border border-govBlue-200 text-govBlue-900">
                 <Clock className="h-8 w-8" />
               </div>
             </div>
 
-            <div className="glass p-6 rounded-2xl flex items-center justify-between border-l-4 border-l-red-500 shadow-xl">
+            <div className="dossier-card p-6 rounded-lg flex items-center justify-between border-l-4 border-l-sla-red shadow-sm">
               <div>
-                <span className="text-xs text-govBlue-200 uppercase font-semibold tracking-wider">Current SLA Violations</span>
+                <span className="text-[10px] text-govBlue-700 uppercase font-bold tracking-wider">Active SLA Bottlenecks</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span ref={violationsCountRef} className="text-4xl font-extrabold text-red-400 leading-none">0</span>
-                  <span className="text-sm font-semibold text-govBlue-200">files</span>
+                  <span ref={violationsCountRef} className="text-4xl font-serif font-extrabold text-sla-red leading-none">0</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-govBlue-700 ml-1">files</span>
                 </div>
-                <span className="text-[10px] text-govBlue-200 mt-1 block">In-progress files exceeding stage-level hours limit</span>
+                <span className="text-[10px] text-govBlue-700 font-medium mt-2 block">Active files currently exceeding stage SLA limit</span>
               </div>
-              <div className="p-3 bg-red-500/10 rounded-2xl border border-red-500/20 text-red-450">
+              <div className="p-3 bg-sla-red/5 rounded border border-sla-red/30 text-sla-red">
                 <AlertTriangle className="h-8 w-8" />
               </div>
             </div>
@@ -210,14 +213,14 @@ export default function Analytics() {
           {/* Mid Section - Load vs Violations */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Per-Officer Pending Load */}
-            <div className="glass p-6 rounded-2xl border border-govBlue-700/50 shadow-xl">
-              <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-400" />
-                Officer Pending Workloads (Held Files)
+            <div className="dossier-card p-6 rounded-lg shadow-sm">
+              <h3 className="text-sm font-serif font-bold text-govBlue-900 mb-6 flex items-center gap-2">
+                <Users className="h-5 w-5 text-govBlue-700" />
+                Officer Queue Workloads (Held Dossiers)
               </h3>
 
               {officerLoad.length === 0 ? (
-                <p className="text-sm text-govBlue-200 py-6 text-center">No active workload data available.</p>
+                <p className="text-xs text-govBlue-750 font-bold uppercase tracking-wider py-6 text-center">No active workload data available.</p>
               ) : (
                 <div ref={barsRef} className="space-y-4">
                   {(() => {
@@ -228,13 +231,13 @@ export default function Analytics() {
                       return (
                         <div key={officer.full_name} className="space-y-1.5">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-white">{officer.full_name}</span>
-                            <span className="text-govBlue-200 font-medium">{count} files ({officer.role.replace('_', ' ')})</span>
+                            <span className="font-serif font-bold text-govBlue-900">{officer.full_name}</span>
+                            <span className="text-govBlue-700 font-bold uppercase tracking-wider text-[10px]">{count} files ({officer.role?.replace('_', ' ')})</span>
                           </div>
-                          <div className="h-3 w-full bg-govBlue-900 rounded-full overflow-hidden border border-govBlue-700/40">
+                          <div className="h-3 w-full bg-govBlue-200 rounded overflow-hidden border border-govBlue-200 bg-white">
                             <div
                               data-width={percent}
-                              className="work-bar h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
+                              className="work-bar h-full bg-govBlue-900 rounded-r"
                               style={{ width: '0%' }}
                             ></div>
                           </div>
@@ -247,30 +250,35 @@ export default function Analytics() {
             </div>
 
             {/* Overdue Files List */}
-            <div className="glass p-6 rounded-2xl border border-govBlue-700/50 shadow-xl">
-              <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2">
-                <BarChart2 className="h-5 w-5 text-blue-400" />
+            <div className="dossier-card p-6 rounded-lg shadow-sm relative">
+              {/* File Tab signature element */}
+              <div className="file-folder-tab font-stamp">
+                OVERDUE AUDIT
+              </div>
+
+              <h3 className="text-sm font-serif font-bold text-govBlue-900 mb-6 flex items-center gap-2 mt-2">
+                <BarChart2 className="h-5 w-5 text-govBlue-700" />
                 Active SLA Violations Detail
               </h3>
 
               {violations.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-emerald-400 font-semibold">Zero SLA violations logged!</p>
-                  <p className="text-xs text-govBlue-200 mt-1">All officers are handling files within their stage limit times.</p>
+                  <p className="text-xs text-sla-green font-bold uppercase tracking-wider">✓ Zero SLA violations logged!</p>
+                  <p className="text-xs text-govBlue-700 mt-1">All officers are handling files within their stage limit times.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-govBlue-700/30 max-h-80 overflow-y-auto pr-2">
+                <div className="divide-y divide-dashed divide-govBlue-200 max-h-80 overflow-y-auto pr-2 bg-white rounded border border-govBlue-200">
                   {violations.map((v) => (
-                    <div key={v.reference_number} className="py-3 flex items-center justify-between first:pt-0 last:pb-0">
+                    <div key={v.reference_number} className="py-3 px-3 flex items-center justify-between first:pt-2 last:pb-2">
                       <div>
-                        <span className="text-xs font-bold text-white block leading-tight">{v.reference_number}</span>
-                        <span className="text-[10px] text-govBlue-200 mt-0.5 block">Stage: {v.stage_name}</span>
+                        <span className="text-xs font-stamp font-bold text-govBlue-900 block leading-tight">{v.reference_number}</span>
+                        <span className="text-[10px] text-govBlue-700 mt-0.5 block uppercase font-bold">Stage: {v.stage_name}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs text-red-400 font-semibold block leading-tight">
+                        <span className="text-xs text-sla-red font-bold block leading-tight">
                           +{Math.max(0, Number(v.hours_at_stage) - Number(v.sla_hours)).toFixed(1)} hrs overdue
                         </span>
-                        <span className="text-[9px] text-govBlue-200 block">Total desk hours: {Number(v.hours_at_stage).toFixed(1)}</span>
+                        <span className="text-[9px] text-govBlue-700 block font-stamp mt-0.5">Desk hours: {Number(v.hours_at_stage).toFixed(1)}</span>
                       </div>
                     </div>
                   ))}
