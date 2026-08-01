@@ -138,6 +138,18 @@ export default function CitizenStatus() {
               </div>
             </div>
 
+            {statusData.status === 'in_progress' && statusData.current_holder_name && (
+              <div className="py-3.5 border-t border-dashed border-govBlue-200">
+                <span className="text-[9px] text-govBlue-700 font-bold uppercase tracking-wider block">Active Custody Holder</span>
+                <p className="text-xs font-serif font-extrabold text-govBlue-900 mt-1 leading-tight">
+                  {statusData.current_holder_name}
+                  <span className="font-sans font-bold text-[9px] text-govBlue-700 ml-1.5 uppercase">
+                    ({statusData.current_holder_role?.replace(/_/g, ' ')})
+                  </span>
+                </p>
+              </div>
+            )}
+
             <div className="pt-4 border-t border-dashed border-govBlue-200 flex items-center gap-2 text-xs text-govBlue-700 font-stamp uppercase">
               <Clock className="h-4 w-4 text-govBlue-500 shrink-0" />
               <span>Updated: {new Date(statusData.stage_entered_at).toLocaleString()}</span>

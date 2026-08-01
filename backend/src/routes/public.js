@@ -26,9 +26,11 @@ router.use(publicLookupLimiter);
 router.get('/status/:referenceNumber', async (req, res, next) => {
   try {
     const result = await pool.query(
-      `SELECT f.reference_number, s.stage_name, f.status, f.stage_entered_at
+      `SELECT f.reference_number, s.stage_name, f.status, f.stage_entered_at,
+              u.full_name AS current_holder_name, u.role AS current_holder_role
        FROM files f
        JOIN stages s ON f.current_stage_id = s.id
+       LEFT JOIN users u ON f.current_holder_id = u.id
        WHERE f.reference_number = $1`,
       [req.params.referenceNumber]
     );
