@@ -225,7 +225,7 @@ export default function Upload() {
                 <div className="mb-4 bg-white p-2 border border-govBlue-200 rounded">
                   {createdFile.qr_image_path ? (
                     <img
-                      src={createdFile.qr_image_path}
+                      src={(import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '') + createdFile.qr_image_path}
                       alt="QR label"
                       className="w-[180px] h-[180px] mx-auto"
                     />
@@ -238,7 +238,7 @@ export default function Upload() {
                 <div className="mb-4">
                   {createdFile.barcode_image_path ? (
                     <img
-                      src={createdFile.barcode_image_path}
+                      src={(import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '') + createdFile.barcode_image_path}
                       alt="Barcode label"
                       className="mx-auto max-w-full"
                     />

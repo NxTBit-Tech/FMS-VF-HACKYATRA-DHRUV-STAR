@@ -114,13 +114,21 @@ export default function FileDetail() {
             {file.qr_image_path && (
               <div className="text-center">
                 <p className="text-[10px] font-bold uppercase text-govBlue-700 mb-2">QR label</p>
-                <img src={file.qr_image_path} alt="QR" className="w-32 h-32 border rounded" />
+                <img 
+                  src={(import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '') + file.qr_image_path} 
+                  alt="QR" 
+                  className="w-32 h-32 border rounded animate-fade-in" 
+                />
               </div>
             )}
             {file.barcode_image_path && (
               <div className="text-center">
                 <p className="text-[10px] font-bold uppercase text-govBlue-700 mb-2">Barcode label</p>
-                <img src={file.barcode_image_path} alt="Barcode" className="max-h-24 border rounded" />
+                <img 
+                  src={(import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '') + file.barcode_image_path} 
+                  alt="Barcode" 
+                  className="max-h-24 border rounded animate-fade-in" 
+                />
               </div>
             )}
           </div>
